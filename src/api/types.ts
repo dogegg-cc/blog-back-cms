@@ -88,3 +88,36 @@ export interface PaginatedResult<T> {
   total: number;
   items: T[];
 }
+/**
+ * 文章详情（用于编辑回显）
+ */
+export interface ArticleDetail {
+  id: string;
+  title: string;
+  summary?: string | null;
+  bannerUrl?: string | null;
+  content: string;
+  category?: CategoryResponse | null;
+  tags?: TagResponse[];
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 创建文章参数
+ */
+export interface CreateArticleParams {
+  title: string;
+  summary?: string;
+  /** 提交给服务器的半路径 */
+  bannerUrl?: string;
+  content: string;
+  categoryId?: string;
+  tagIds?: string[];
+}
+
+/**
+ * 更新文章参数
+ */
+export type UpdateArticleParams = CreateArticleParams;

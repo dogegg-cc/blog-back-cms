@@ -34,6 +34,9 @@
       </el-form>
 
       <div class="table-actions">
+        <el-button type="primary" :icon="Plus" @click="router.push('/article/create')">
+          新建文章
+        </el-button>
         <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
           批量删除 {{ selectedIds.length ? `(${selectedIds.length})` : "" }}
         </el-button>
@@ -114,6 +117,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { Plus } from "@element-plus/icons-vue";
 import { getArticleList, deleteArticles } from "@/api/article";
 import { getCategoryList } from "@/api/category";
 import { getTagList } from "@/api/tag";

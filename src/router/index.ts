@@ -41,6 +41,18 @@ const router = createRouter({
               meta: {},
             },
             {
+              path: "create",
+              name: "新建文章",
+              component: () => import("@/views/article/ArticleForm.vue"),
+              meta: { hidden: true },
+            },
+            {
+              path: "edit/:id",
+              name: "编辑文章",
+              component: () => import("@/views/article/ArticleForm.vue"),
+              meta: { hidden: true },
+            },
+            {
               path: "category",
               name: "分类管理",
               component: () => import("@/views/category/CategoryList.vue"),
