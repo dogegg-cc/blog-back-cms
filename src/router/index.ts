@@ -28,7 +28,7 @@ const router = createRouter({
         {
           path: 'article/list',
           name: '文章列表',
-          component: () => import('@/views/dashboard/DashboardView.vue'), // 暂时复用仪表盘
+          component: () => import('@/views/article/ArticleList.vue'),
         }
       ]
     }

@@ -10,6 +10,12 @@
 - **强制修改密码逻辑**:
   - 新增修改密码页 [`UpdatePasswordView.vue`](file:///Users/jiao/Desktop/Project/blog/blog-back-cms/src/views/login/UpdatePasswordView.vue)。
   - 登录后若 `isUpdatePassword` 为 `false`，则强制拦截并要求改密。
+- **文章管理模块**:
+  - 创建了 [`ArticleList.vue`](file:///Users/jiao/Desktop/Project/blog/blog-back-cms/src/views/article/ArticleList.vue)，支持分页展示标题、简介、Banner 预览、阅读量及分类标签。
+  - 实现了基于分类和标签的条件筛选。
+  - 实现了文章的批量删除功能，并带有二次确认安全交互。
+- **工具方法**:
+  - 新增 [`url.ts`](file:///Users/jiao/Desktop/Project/blog/blog-back-cms/src/utils/url.ts) 用于处理后端返回的图片资源全路径。
 - **API 接口对接**:
   - 对接了后端的登录 (`logon`)、退出 (`logoff`)、改密 (`updatePassword`) 真实接口。
 - **CSS 预处理器**: 配置了对 `Less` 的支持，并重构了部分组件样式。
