@@ -21,7 +21,7 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item>个人中心</el-dropdown-item>
-            <el-dropdown-item divided>退出登录</el-dropdown-item>
+            <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -30,15 +30,28 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
+import { removeToken } from '@/utils/auth'
+import { ElMessageBox, ElMessage } from 'element-plus'
 
 const route = useRoute()
+const router = useRouter()
 const appStore = useAppStore()
 
 const toggleSidebar = () => {
   appStore.toggleSidebar()
+}
+
+const handleLogout = () => {
+  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+    type: 'warning'
+  }).then(() => {
+    removeToken()
+    router.push('/login')
+    ElMessage.success('已退出登录')
+  }).catch(() => {})
 }
 </script>
 

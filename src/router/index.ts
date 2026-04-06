@@ -5,6 +5,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/login',
+      name: '登录',
+      component: () => import('@/views/login/LoginView.vue'),
+    },
+    {
       path: '/',
       component: BaseLayout,
       redirect: '/dashboard',
@@ -22,6 +27,20 @@ const router = createRouter({
       ]
     }
   ],
+})
+
+import { getToken } from '@/utils/auth'
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const token = getToken()
+  if (to.path !== '/login' && !token) {
+    next('/login')
+  } else if (to.path === '/login' && token) {
+    next('/')
+  } else {
+    next()
+  }
 })
 
 export default router

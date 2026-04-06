@@ -3,6 +3,14 @@
 ## [1.0.0] - 2026-04-06
 
 ### ✨ 新增特性 (Added)
+- **身份认证工具类 (auth.ts)**:
+  - 抽离了 `localStorage` 的 Token 操作（获取、设置、移除）。
+  - 统一了系统中对 `blog_token` 的访问入口。
+- **登录页面 (LoginView)**:
+  - 提供了带背景渐变的精致登录界面。
+  - 集成了表单校验（用户名/密码长度及必填项）。
+  - 实现了基于 `localStorage` 的 Mock 登录跳转逻辑。
+  - **路由守卫**: 实现了全局前置守卫，确保未登录用户强制重定向至 `/login`，已登录用户不可重复进入登录页。
 - **项目规约**: 初始化了 [`.antigravity.rules`](file:///Users/jiao/Desktop/Project/blog/blog-back-cms/.antigravity.rules) 规约文件，确立了 Antigravity 协助开发标准。
 - **自动导入系统**: 集成 `unplugin-auto-import` 和 `unplugin-vue-components`。现在 Element Plus 组件及库函数无需手动导入即可在代码中直接使用。
 - **基础布局 (BaseLayout)**:
