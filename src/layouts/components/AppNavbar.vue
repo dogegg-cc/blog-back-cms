@@ -20,21 +20,42 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>个人中心</el-dropdown-item>
+            <el-dropdown-item @click="showUpdatePwd">修改密码</el-dropdown-item>
             <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
     </div>
+
+    <!-- 修改密码弹窗 -->
+    <el-dialog
+      v-model="pwdDialogVisible"
+      title="修改密码"
+      width="400px"
+      append-to-body
+      @close="resetPwdForm"
+    >
+      <ChangePasswordForm ref="pwdFormRef" @success="pwdDialogVisible = false">
+        <template #footer="{ loading, submit }">
+          <div style="text-align: right; margin-top: 20px">
+            <el-button @click="pwdDialogVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="loading" @click="submit">确 认</el-button>
+          </div>
+        </template>
+      </ChangePasswordForm>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
 import { removeToken } from '@/utils/auth'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { logoff } from '@/api/user'
+import ChangePasswordForm from '@/components/common/ChangePasswordForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,7 +65,17 @@ const toggleSidebar = () => {
   appStore.toggleSidebar()
 }
 
-import { logoff } from '@/api/user'
+// 修改密码弹窗控制
+const pwdDialogVisible = ref(false)
+const pwdFormRef = ref<InstanceType<typeof ChangePasswordForm>>()
+
+const showUpdatePwd = () => {
+  pwdDialogVisible.value = true
+}
+
+const resetPwdForm = () => {
+  pwdFormRef.value?.resetFields()
+}
 
 const handleLogout = () => {
   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
