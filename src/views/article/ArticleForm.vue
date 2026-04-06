@@ -233,7 +233,7 @@ const editorContainer = ref<HTMLElement | null>(null);
 const initEditor = (content = "") => {
   if (!editorContainer.value) return;
   vditorInstance = new Vditor(editorContainer.value, {
-    height: 700,
+    minHeight: 400, // 最小高度保障，实际高度由外层 CSS flex:1 控制
     mode: "ir",
     theme: "classic",
     placeholder: "请输入文章内容...",
@@ -498,10 +498,12 @@ onBeforeUnmount(() => {
 
 <style lang="less" scoped>
 .article-form-container {
-  min-height: calc(100vh - 84px);
+  // 容器悦了整个可用区域，自身不滚动
+  height: calc(100vh - 84px);
   background-color: #f5f7fa;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .form-topbar {
@@ -511,9 +513,9 @@ onBeforeUnmount(() => {
   padding: 12px 24px;
   background: #fff;
   border-bottom: 1px solid #e4e7ed;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  // 不参与滚动，容器本身定高且 overflow:hidden，topbar 始终可见
+  flex-shrink: 0;
+  z-index: 10;
 
   .topbar-title {
     font-size: 16px;
@@ -524,15 +526,17 @@ onBeforeUnmount(() => {
 
 .form-body {
   flex: 1;
+  min-height: 0; // 关键：flex 子元素必须指定，否则高度无法向下传递
   display: flex;
   gap: 20px;
   padding: 20px;
-  align-items: flex-start;
+  align-items: stretch; // 两列非独立滚动
 }
 
 .form-main {
   flex: 1;
   min-width: 0;
+  min-height: 0; // 必须！与 form-body 的 min-height:0 配合，完成高度链传递
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -569,18 +573,35 @@ onBeforeUnmount(() => {
     }
   }
 
-  .summary-input {
-    :deep(.el-textarea__inner) {
-      border-radius: 8px;
-      resize: none;
-    }
-  }
-
   .editor-wrapper {
+    flex: 1; // 占满 form-main 的剩余高度
+    min-height: 0;
     border-radius: 8px;
     overflow: hidden;
     background: #fff;
     border: 1px solid #e4e7ed;
+
+    // 穿透覆盖 Vditor 内部内联高度，让编辑器充满容器
+    :deep(.vditor) {
+      height: 100% !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :deep(.vditor-content) {
+      flex: 1;
+      min-height: 0 !important;
+      overflow: hidden;
+    }
+
+    :deep(.vditor-ir),
+    :deep(.vditor-sv),
+    :deep(.vditor-wysiwyg) {
+      height: 100% !important;
+      min-height: 0 !important;
+      box-sizing: border-box;
+      overflow-y: auto !important;
+    }
   }
 }
 
@@ -590,6 +611,9 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  // 侧边栏独立滚动，不影响主内容区高度
+  overflow-y: auto;
+  max-height: 100%;
 
   .aside-card {
     :deep(.el-card__header) {
