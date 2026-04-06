@@ -61,11 +61,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { Plus } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getPageModuleList, deletePageModule, updatePageModule } from "@/api/page-module";
 import type { PageModuleResponseDto } from "@/api/types";
 
+const router = useRouter();
 const loading = ref(false);
 const moduleList = ref<(PageModuleResponseDto & { statusLoading?: boolean })[]>([]);
 
@@ -114,13 +116,13 @@ const handleDelete = (row: PageModuleResponseDto) => {
 };
 
 const handleCreate = () => {
-    ElMessage.info("创建首页模块功能正在开发中...");
+    router.push('/page-module/create');
 };
 
 const handleEdit = (row: PageModuleResponseDto) => {
-    console.log('edit', row.id);
-    ElMessage.info("编辑功能正在开发中...");
+    router.push(`/page-module/edit/${row.id}`);
 };
+
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return "-";

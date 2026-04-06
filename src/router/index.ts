@@ -84,6 +84,18 @@ const router = createRouter({
               component: () => import("@/views/page-module/PageModuleList.vue"),
               meta: {},
             },
+            {
+              path: "create",
+              name: "添加模块",
+              component: () => import("@/views/page-module/PageModuleEdit.vue"),
+              meta: { hidden: true },
+            },
+            {
+              path: "edit/:id",
+              name: "编辑模块",
+              component: () => import("@/views/page-module/PageModuleEdit.vue"),
+              meta: { hidden: true },
+            },
           ],
         },
       ],

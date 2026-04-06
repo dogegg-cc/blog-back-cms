@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-import type { PageModuleResponseDto, UpdatePageModuleParams } from "./types";
+import type { PageModuleResponseDto, CreatePageModuleParams, UpdatePageModuleParams } from "./types";
 
 /**
  * 获取首页模块列表
@@ -8,6 +8,17 @@ export function getPageModuleList() {
   return request<PageModuleResponseDto[]>({
     url: "/api/pageModule",
     method: "get",
+  });
+}
+
+/**
+ * 创建首页模块
+ */
+export function createPageModule(data: CreatePageModuleParams) {
+  return request<PageModuleResponseDto>({
+    url: "/api/pageModule",
+    method: "post",
+    data,
   });
 }
 

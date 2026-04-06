@@ -158,6 +158,8 @@ export interface ArticleSummaryDto {
   title: string;
   summary?: string | null;
   bannerUrl?: string | null;
+  category?: CategoryResponse | null;
+  tags?: TagResponse[];
 }
 
 /**
@@ -186,12 +188,22 @@ export interface PageModuleResponseDto {
 }
 
 /**
- * 更新首页模块状态参数
+ * 创建首页模块参数
  */
-export interface UpdatePageModuleParams {
-  isActive?: boolean;
-  content?: {
+export interface CreatePageModuleParams {
+  title: string;
+  type: string;
+  intro?: string;
+  styleType: string;
+  sortOrder: number;
+  content: {
     articleIds?: string[];
     imageUrls?: string[];
   };
+  isActive: boolean;
 }
+
+/**
+ * 更新首页模块参数
+ */
+export type UpdatePageModuleParams = Partial<CreatePageModuleParams>;
