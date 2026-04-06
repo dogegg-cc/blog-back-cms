@@ -44,13 +44,22 @@ const toggleSidebar = () => {
   appStore.toggleSidebar()
 }
 
+import { logoff } from '@/api/user'
+
 const handleLogout = () => {
   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
     type: 'warning'
-  }).then(() => {
-    removeToken()
-    router.push('/login')
-    ElMessage.success('已退出登录')
+  }).then(async () => {
+    try {
+      await logoff()
+      removeToken()
+      router.push('/login')
+      ElMessage.success('已退出登录')
+    } catch {
+      // 错误由拦截器处理，但仍需清理本地状态以防万一或根据业务决定
+      removeToken()
+      router.push('/login')
+    }
   }).catch(() => {})
 }
 </script>

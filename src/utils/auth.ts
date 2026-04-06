@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'blog_token'
+const UPDATE_PWD_KEY = 'is_update_password'
 
 /**
  * 获取 Token
@@ -20,4 +21,19 @@ export function setToken(token: string) {
  */
 export function removeToken() {
   localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(UPDATE_PWD_KEY)
+}
+
+/**
+ * 获取“是否已修改密码”标志
+ */
+export function getUpdatePasswordStatus() {
+  return localStorage.getItem(UPDATE_PWD_KEY) === 'true'
+}
+
+/**
+ * 设置“是否已修改密码”标志
+ */
+export function setUpdatePasswordStatus(status: boolean | string) {
+  localStorage.setItem(UPDATE_PWD_KEY, String(status))
 }

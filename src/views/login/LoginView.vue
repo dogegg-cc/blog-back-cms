@@ -62,7 +62,8 @@ const loginRules = {
   ],
 };
 
-import { setToken } from "@/utils/auth";
+import { setToken, setUpdatePasswordStatus } from "@/utils/auth";
+import { logon } from "@/api/user";
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return;
@@ -71,17 +72,25 @@ const handleLogin = async () => {
     if (valid) {
       loading.value = true;
       try {
-        // 模拟 API 请求延时
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const data = await logon({
+          username: loginForm.username,
+          password: loginForm.password
+        });
 
         ElMessage.success("登录成功");
-        // 使用工具函数设置 Token
-        setToken("mock_token_12345");
+        
+        // 存储 Token 和 改密状态
+        setToken(data.token);
+        setUpdatePasswordStatus(data.isUpdatePassword);
 
-        // 跳转到首页（仪表盘）
-        router.push("/");
+        // 如果需要修改密码，跳转到改密页
+        if (!data.isUpdatePassword) {
+            router.push("/update-password");
+        } else {
+            router.push("/");
+        }
       } catch {
-        ElMessage.error("登录失败，请检查用户名或密码");
+        // 错误控制交由 request.ts 中的全局拦截处理
       } finally {
         loading.value = false;
       }

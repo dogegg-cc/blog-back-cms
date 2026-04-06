@@ -3,6 +3,15 @@
 ## [1.0.0] - 2026-04-06
 
 ### ✨ 新增特性 (Added)
+- **网络请求封装 (request.ts)**:
+  - 基于 Axios 封装了统一的请求工具，直连 `http://localhost:3001`。
+  - 自动注入 `dogtoken` 凭证，并处理业务 `code=1` 成功逻辑。
+  - 集成了 `10005/10006/10007` 异常状态码的自动重定向。
+- **强制修改密码逻辑**:
+  - 新增修改密码页 [`UpdatePasswordView.vue`](file:///Users/jiao/Desktop/Project/blog/blog-back-cms/src/views/login/UpdatePasswordView.vue)。
+  - 登录后若 `isUpdatePassword` 为 `false`，则强制拦截并要求改密。
+- **API 接口对接**:
+  - 对接了后端的登录 (`logon`)、退出 (`logoff`)、改密 (`updatePassword`) 真实接口。
 - **CSS 预处理器**: 配置了对 `Less` 的支持，并重构了部分组件样式。
 - **身份认证工具类 (auth.ts)**:
   - 抽离了 `localStorage` 的 Token 操作（获取、设置、移除）。
