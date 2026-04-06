@@ -29,6 +29,11 @@ const router = createRouter({
           path: 'article/list',
           name: '文章列表',
           component: () => import('@/views/article/ArticleList.vue'),
+        },
+        {
+          path: 'article/category',
+          name: '分类管理',
+          component: () => import('@/views/category/CategoryList.vue'),
         }
       ]
     }

@@ -29,7 +29,16 @@ export interface UpdatePasswordParams {
 export interface CategoryResponse {
   id: string;
   name: string;
+  slug: string;
   description?: string;
+}
+
+/**
+ * 创建分类参数
+ */
+export interface CreateCategoryParams {
+  name: string;
+  slug: string;
 }
 
 /**
