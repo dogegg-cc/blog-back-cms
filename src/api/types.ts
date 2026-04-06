@@ -50,6 +50,13 @@ export interface TagResponse {
 }
 
 /**
+ * 创建标签参数
+ */
+export interface CreateTagParams {
+  name: string;
+}
+
+/**
  * 文章列表条目信息
  */
 export interface ArticleListItem {
