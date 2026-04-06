@@ -64,6 +64,9 @@ const loginRules = {
 
 import { setToken, setUpdatePasswordStatus } from "@/utils/auth";
 import { logon } from "@/api/user";
+import { useUserStore } from "@/stores/user";
+
+const userStore = useUserStore();
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return;
@@ -82,6 +85,16 @@ const handleLogin = async () => {
         // 存储 Token 和 改密状态
         setToken(data.token);
         setUpdatePasswordStatus(data.isUpdatePassword);
+
+        // 存储用户信息
+        userStore.setUserInfo({
+            name: data.name ?? null,
+            email: data.email ?? null,
+            github: data.github ?? null,
+            slogan: data.slogan ?? null,
+            avatar: data.avatar ?? null,
+            isUpdatePassword: data.isUpdatePassword
+        });
 
         // 如果需要修改密码，跳转到改密页
         if (!data.isUpdatePassword) {

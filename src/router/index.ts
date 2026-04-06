@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import BaseLayout from "@/layouts/BaseLayout.vue";
-import { getToken, getUpdatePasswordStatus } from "@/utils/auth";
+import { getToken, getUpdatePasswordStatus, removeToken } from "@/utils/auth";
+import { useUserStore } from "@/stores/user";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -67,6 +68,12 @@ const router = createRouter({
           ],
         },
         {
+          path: "user/profile",
+          name: "个人信息",
+          component: () => import("@/views/user/UserProfile.vue"),
+          meta: { icon: "User", hidden: true },
+        },
+        {
           path: "user",
           name: "用户管理",
           component: () => import("@/views/dashboard/DashboardView.vue"), // 临时占位，稍后由用户补充
@@ -78,9 +85,10 @@ const router = createRouter({
 });
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const token = getToken();
   const isUpdatePassword = getUpdatePasswordStatus();
+  const userStore = useUserStore();
 
   if (to.path === "/login") {
     if (token) {
@@ -95,6 +103,18 @@ router.beforeEach((to, from, next) => {
   if (!token) {
     next("/login");
     return;
+  }
+
+  // 已登录，检查是否已有用户信息（处理页面刷新）
+  if (token && !userStore.userInfo) {
+    try {
+      await userStore.getInfo();
+    } catch {
+      // 获取失败（可能 Token 到期），清理并去登录
+      removeToken();
+      next("/login");
+      return;
+    }
   }
 
   // 已登录，但未修改初始密码且不在改密页

@@ -14,12 +14,13 @@
     <div class="right">
       <el-dropdown trigger="click">
         <span class="user-info">
-          <el-avatar :size="30" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
-          <span class="username">管理员</span>
+          <el-avatar :size="30" :src="getFullImageUrl(userStore.avatar)" />
+          <span class="username">{{ userStore.name }}</span>
           <el-icon><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
+            <el-dropdown-item @click="router.push('/user/profile')">个人信息</el-dropdown-item>
             <el-dropdown-item @click="showUpdatePwd">修改密码</el-dropdown-item>
             <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
@@ -51,15 +52,18 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
 import { Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
 import { removeToken } from '@/utils/auth'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { logoff } from '@/api/user'
+import { getFullImageUrl } from '@/utils/url'
 import ChangePasswordForm from '@/components/common/ChangePasswordForm.vue'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const userStore = useUserStore()
 
 const toggleSidebar = () => {
   appStore.toggleSidebar()
@@ -84,11 +88,13 @@ const handleLogout = () => {
     try {
       await logoff()
       removeToken()
+      userStore.clearUserInfo()
       router.push('/login')
       ElMessage.success('已退出登录')
     } catch {
       // 错误由拦截器处理，但仍需清理本地状态以防万一或根据业务决定
       removeToken()
+      userStore.clearUserInfo()
       router.push('/login')
     }
   }).catch(() => {})

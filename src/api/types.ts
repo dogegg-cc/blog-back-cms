@@ -12,6 +12,34 @@ export interface LoginParams {
 export interface LoginResponse {
   token: string;
   isUpdatePassword: boolean;
+  name?: string | null;
+  email?: string | null;
+  github?: string | null;
+  slogan?: string | null;
+  avatar?: string | null;
+}
+
+/**
+ * 用户详细信息（API 返回格式）
+ */
+export interface UserInfoDto {
+  name: string | null;
+  email: string | null;
+  github: string | null;
+  slogan: string | null;
+  avatar: string | null;
+  isUpdatePassword: boolean;
+}
+
+/**
+ * 更新用户信息参数
+ */
+export interface UpdateUserParams {
+  name?: string;
+  email?: string;
+  github?: string;
+  slogan?: string;
+  avatar?: string;
 }
 
 /**
