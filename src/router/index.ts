@@ -74,10 +74,17 @@ const router = createRouter({
           meta: { icon: "User", hidden: true },
         },
         {
-          path: "user",
-          name: "用户管理",
-          component: () => import("@/views/dashboard/DashboardView.vue"), // 临时占位，稍后由用户补充
-          meta: { icon: "User" },
+          path: "page-module",
+          name: "首页配置",
+          meta: { icon: "Setting" },
+          children: [
+            {
+              path: "list",
+              name: "信息流配置",
+              component: () => import("@/views/page-module/PageModuleList.vue"),
+              meta: {},
+            },
+          ],
         },
       ],
     },

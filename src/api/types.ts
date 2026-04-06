@@ -149,3 +149,49 @@ export interface CreateArticleParams {
  * 更新文章参数
  */
 export type UpdateArticleParams = CreateArticleParams;
+
+/**
+ * 文章简要信息（用于首页模块内容铺开）
+ */
+export interface ArticleSummaryDto {
+  id: string;
+  title: string;
+  summary?: string | null;
+  bannerUrl?: string | null;
+}
+
+/**
+ * 首页模块内容结构
+ */
+export interface PageModuleContent {
+  articleIds?: string[];
+  imageUrls?: string[];
+  articles?: ArticleSummaryDto[];
+}
+
+/**
+ * 首页模块响应模型
+ */
+export interface PageModuleResponseDto {
+  id: string;
+  title: string;
+  type: "POST_LIST" | "PHOTO_GALLERY" | string;
+  intro?: string | null;
+  styleType: string;
+  sortOrder: number;
+  content: PageModuleContent;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 更新首页模块状态参数
+ */
+export interface UpdatePageModuleParams {
+  isActive?: boolean;
+  content?: {
+    articleIds?: string[];
+    imageUrls?: string[];
+  };
+}
