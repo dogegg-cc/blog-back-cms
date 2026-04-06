@@ -2,7 +2,7 @@
   <div class="login-container">
     <el-card class="login-card" shadow="always">
       <div class="login-title">
-        <h2>Blog CMS</h2>
+        <h2>博客管理系统</h2>
         <p>欢迎回来，请登录您的账户</p>
       </div>
 
@@ -28,20 +28,10 @@
           />
         </el-form-item>
 
-        <div class="login-options">
-          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-          <el-link type="primary" :underline="false">忘记密码？</el-link>
-        </div>
-
         <el-button type="primary" class="login-button" :loading="loading" @click="handleLogin">
           {{ loading ? "登录中..." : "登 录" }}
         </el-button>
       </el-form>
-
-      <div class="login-footer">
-        <span>还没有账户？</span>
-        <el-link type="primary" :underline="false">立即注册</el-link>
-      </div>
     </el-card>
   </div>
 </template>
@@ -55,7 +45,6 @@ import { ElMessage, type FormInstance } from "element-plus";
 const router = useRouter();
 const loginFormRef = ref<FormInstance>();
 const loading = ref(false);
-const rememberMe = ref(false);
 
 const loginForm = reactive({
   username: "",
@@ -107,7 +96,7 @@ const handleLogin = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #3b2063 0%, #3b2063 100%);
+  background: linear-gradient(135deg, #6499af 0%, #ffdcda 100%);
 
   .login-card {
     width: 100%;
@@ -133,18 +122,12 @@ const handleLogin = async () => {
       }
     }
 
-    .login-options {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
     .login-button {
       width: 100%;
       height: 48px;
       font-size: 16px;
       margin-bottom: 20px;
+      margin-top: 20px;
     }
 
     .login-footer {
