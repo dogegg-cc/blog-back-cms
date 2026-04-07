@@ -34,6 +34,7 @@
             clearable 
             :disabled="!query.categoryId"
             style="width: 150px"
+            @change="handleSearch"
           >
             <el-option
               v-for="item in availableTags"
@@ -155,6 +156,7 @@ const availableTags = computed(() => {
 
 const handleCategoryChange = () => {
   query.tagId = ''; // 切换分类时清空标签
+  handleSearch(); // 自动刷新列表
 };
 
 watch(() => props.modelValue, (val) => {
@@ -179,6 +181,11 @@ const loadMeta = async () => {
 };
 
 const handleSearch = async () => {
+  query.page = 1; // 筛选条件变动时重置页码
+  await fetchArticleList();
+};
+
+const fetchArticleList = async () => {
   loading.value = true;
   try {
     const res = await getArticleList(query);
@@ -191,7 +198,7 @@ const handleSearch = async () => {
 
 const handlePageChange = (page: number) => {
   query.page = page;
-  handleSearch();
+  fetchArticleList();
 };
 
 const isSelected = (item: ArticleListItem) => {
