@@ -83,12 +83,12 @@
         <el-table-column prop="viewCount" label="阅读" width="100" align="center" sortable />
         <el-table-column label="发布时间" width="180">
           <template #default="{ row }">
-            {{ row.createdAt ? dayjs(row.createdAt).format("YYYY-MM-DD HH:mm") : "-" }}
+            {{ row.createdAt ? dayjs(row.createdAt).format(DATE_FORMAT) : "-" }}
           </template>
         </el-table-column>
         <el-table-column label="更新时间" width="180">
           <template #default="{ row }">
-            {{ row.updatedAt ? dayjs(row.updatedAt).format("YYYY-MM-DD HH:mm") : "-" }}
+            {{ row.updatedAt ? dayjs(row.updatedAt).format(DATE_FORMAT) : "-" }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="120" fixed="right">
@@ -103,7 +103,7 @@
         <el-pagination
           v-model:current-page="queryParams.page"
           v-model:page-size="queryParams.limit"
-          :page-sizes="[10, 20, 50, 100]"
+          :page-sizes="PAGE_SIZES"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
           @size-change="handleSizeChange"
@@ -125,6 +125,7 @@ import type { ArticleListItem, ArticleQuery, CategoryResponse, TagResponse } fro
 import { getFullImageUrl } from "@/utils/url";
 import { ElMessage, ElMessageBox } from "element-plus";
 import dayjs from "dayjs";
+import { DEFAULT_PAGE_SIZE, PAGE_SIZES, DATE_FORMAT } from "@/config/constants";
 
 const router = useRouter();
 
@@ -139,7 +140,7 @@ const selectedIds = ref<string[]>([]);
 // 查询参数
 const queryParams = reactive({
   page: 1,
-  limit: 10,
+  limit: DEFAULT_PAGE_SIZE,
   categoryId: undefined as string | undefined,
   tagId: undefined as string | undefined,
 });

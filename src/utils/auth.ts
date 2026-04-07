@@ -1,5 +1,7 @@
-const TOKEN_KEY = 'blog_token'
-const UPDATE_PWD_KEY = 'is_update_password'
+import { STORAGE_KEYS } from '@/config/constants'
+
+const TOKEN_KEY = STORAGE_KEYS.TOKEN
+const UPDATE_PWD_KEY = STORAGE_KEYS.UPDATE_PWD_STATUS
 
 /**
  * 获取 Token

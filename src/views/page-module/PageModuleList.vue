@@ -42,8 +42,8 @@
         <el-table-column label="创建 / 修改时间" width="200">
           <template #default="{ row }">
             <div class="time-info text-secondary">
-              <div><span class="dot create"></span> 创：{{ formatDate(row.createdAt) }}</div>
-              <div><span class="dot update"></span> 修：{{ formatDate(row.updatedAt) }}</div>
+              <div><span class="dot create"></span> 创：{{ row.createdAt ? dayjs(row.createdAt).format(DATE_FORMAT) : "-" }}</div>
+              <div><span class="dot update"></span> 修：{{ row.updatedAt ? dayjs(row.updatedAt).format(DATE_FORMAT) : "-" }}</div>
             </div>
           </template>
         </el-table-column>
@@ -67,6 +67,8 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { getPageModuleList, deletePageModule, updatePageModule } from "@/api/page-module";
 import { PAGE_MODULE_TYPE_MAP, PAGE_MODULE_STYLE_MAP } from "@/config/pageModule";
 import type { PageModuleResponseDto } from "@/api/types";
+import dayjs from "dayjs";
+import { DATE_FORMAT } from "@/config/constants";
 
 const router = useRouter();
 const loading = ref(false);
@@ -117,18 +119,6 @@ const handleCreate = () => {
 
 const handleEdit = (row: PageModuleResponseDto) => {
     router.push(`/page-module/edit/${row.id}`);
-};
-
-
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return "-";
-  const date = new Date(dateStr);
-  const Y = date.getFullYear();
-  const M = String(date.getMonth() + 1).padStart(2, "0");
-  const D = String(date.getDate()).padStart(2, "0");
-  const h = String(date.getHours()).padStart(2, "0");
-  const m = String(date.getMinutes()).padStart(2, "0");
-  return `${Y}-${M}-${D} ${h}:${m}`;
 };
 
 onMounted(loadData);
