@@ -426,13 +426,18 @@ const handleCreateCategory = async () => {
 const tagDialogVisible = ref(false);
 const tagSubmitting = ref(false);
 const tagFormRef = ref<FormInstance>();
-const tagForm = reactive<CreateTagParams>({ name: "" });
+const tagForm = reactive<CreateTagParams>({ name: "", categoryId: "" });
 const tagRules = reactive<FormRules>({
   name: [{ required: true, message: "请输入标签名称", trigger: "blur" }],
 });
 
 const openTagDialog = () => {
+  if (!form.categoryId) {
+    ElMessage.warning("请先选择文章分类");
+    return;
+  }
   tagForm.name = "";
+  tagForm.categoryId = form.categoryId;
   tagDialogVisible.value = true;
 };
 
@@ -442,7 +447,10 @@ const handleCreateTag = async () => {
     if (valid) {
       tagSubmitting.value = true;
       try {
-        await createTag({ name: tagForm.name });
+        await createTag({ 
+          name: tagForm.name,
+          categoryId: tagForm.categoryId 
+        });
         ElMessage.success("标签创建成功");
         tagDialogVisible.value = false;
         // 刷新标签列表

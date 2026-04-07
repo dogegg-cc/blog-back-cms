@@ -55,6 +55,20 @@
                 <span class="label">别名 (Slug):</span>
                 <el-tag size="small" type="info" effect="plain">{{ item.slug }}</el-tag>
               </div>
+              <div v-if="item.tags && item.tags.length > 0" class="info-item tags-item">
+                <span class="label">标签:</span>
+                <div class="tag-wrapper">
+                  <el-tag
+                    v-for="tag in item.tags"
+                    :key="tag.id"
+                    size="small"
+                    type="success"
+                    class="m-1"
+                  >
+                    {{ tag.name }}
+                  </el-tag>
+                </div>
+              </div>
             </div>
             <div class="card-footer">
               <el-button type="primary" link :icon="Edit" @click="handleEdit(item)">编辑</el-button>
@@ -100,11 +114,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { Plus, Delete, Edit, Search } from "@element-plus/icons-vue";
 import { getCategoryList, createCategory, updateCategory, deleteCategories } from "@/api/category";
 import type { CategoryResponse, CreateCategoryParams } from "@/api/types";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
+
+const router = useRouter();
 
 // 数据载入状态
 const loading = ref(false);
@@ -175,11 +192,7 @@ const handleAdd = () => {
 
 // 编辑
 const handleEdit = (item: CategoryResponse) => {
-  isEdit.value = true;
-  form.id = item.id;
-  form.name = item.name;
-  form.slug = item.slug;
-  dialogVisible.value = true;
+  router.push(`/article/category/edit/${item.id}`);
 };
 
 // 重置表单
@@ -304,13 +317,29 @@ onMounted(() => {
 
         .info-item {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 8px;
+          margin-bottom: 8px;
 
           .label {
             font-size: 13px;
             color: #909399;
             flex-shrink: 0;
+            padding-top: 2px;
+          }
+
+          &.tags-item {
+            margin-top: 12px;
+            
+            .tag-wrapper {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 4px;
+
+              .m-1 {
+                margin: 0;
+              }
+            }
           }
         }
       }

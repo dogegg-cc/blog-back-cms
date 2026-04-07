@@ -1,11 +1,15 @@
 import request from "@/utils/request";
-import type { TagResponse, CreateTagParams } from "./types";
+import type { TagResponse, CreateTagParams, UpdateTagParams } from "./types";
 
 /**
- * 获取所有标签列表
+ * 获取所有标签列表 (支持按分类过滤)
  */
-export function getTagList() {
-  return request<TagResponse[]>("/api/blog/tag/list");
+export function getTagList(categoryId?: string) {
+  return request<TagResponse[]>({
+    url: "/api/blog/tag/list",
+    method: "get",
+    params: { categoryId },
+  });
 }
 
 /**
@@ -20,9 +24,9 @@ export function createTag(data: CreateTagParams) {
 }
 
 /**
- * 更新标签 (ID 拼接在 URL 中)
+ * 更新标签 (ID 拼接在 URL 中，仅支持修改名称)
  */
-export function updateTag(id: string, data: CreateTagParams) {
+export function updateTag(id: string, data: UpdateTagParams) {
   return request({
     url: `/api/blog/tag/update/${id}`,
     method: "put",

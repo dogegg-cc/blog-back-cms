@@ -59,6 +59,7 @@ export interface CategoryResponse {
   name: string;
   slug: string;
   description?: string;
+  tags?: TagResponse[];
 }
 
 /**
@@ -81,6 +82,14 @@ export interface TagResponse {
  * 创建标签参数
  */
 export interface CreateTagParams {
+  name: string;
+  categoryId: string;
+}
+
+/**
+ * 更新标签参数 (只能修改名称)
+ */
+export interface UpdateTagParams {
   name: string;
 }
 
