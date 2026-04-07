@@ -89,6 +89,7 @@
             placeholder="请选择分类（选填）"
             clearable
             style="width: 100%"
+            @change="handleCategoryChange"
           >
             <el-option
               v-for="item in categoryList"
@@ -116,9 +117,15 @@
             collapse-tags
             collapse-tags-tooltip
             clearable
+            :disabled="!form.categoryId"
             style="width: 100%"
           >
-            <el-option v-for="item in tagList" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option
+              v-for="item in availableTags"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
           </el-select>
         </el-card>
       </div>
@@ -172,10 +179,9 @@ import Vditor from "vditor";
 import "vditor/dist/index.css";
 import { getArticleDetail, createArticle, updateArticle } from "@/api/article";
 import { getCategoryList, createCategory } from "@/api/category";
-import { getTagList, createTag } from "@/api/tag";
+import { createTag } from "@/api/tag";
 import type {
   CategoryResponse,
-  TagResponse,
   CreateCategoryParams,
   CreateTagParams,
 } from "@/api/types";
@@ -199,7 +205,6 @@ const isEdit = computed(() => !!articleId.value);
 const pageLoading = ref(false);
 const submitting = ref(false);
 const categoryList = ref<CategoryResponse[]>([]);
-const tagList = ref<TagResponse[]>([]);
 
 // 上传请求头（带 token）
 const uploadHeaders = computed(() => ({
@@ -215,6 +220,17 @@ const form = reactive({
   categoryId: undefined as string | undefined,
   tagIds: [] as string[],
 });
+
+// 计算当前分类下的可用标签
+const availableTags = computed(() => {
+  if (!form.categoryId) return [];
+  const category = categoryList.value.find((c) => c.id === form.categoryId);
+  return category?.tags || [];
+});
+
+const handleCategoryChange = () => {
+  form.tagIds = []; // 切换分类时清空选中的标签
+};
 
 // Banner 相关（半路径存服务器，完整 URL 仅用于预览）
 const bannerPath = ref<string>(""); // 半路径，提交给服务器
@@ -453,8 +469,8 @@ const handleCreateTag = async () => {
         });
         ElMessage.success("标签创建成功");
         tagDialogVisible.value = false;
-        // 刷新标签列表
-        tagList.value = await getTagList();
+        // 刷新分类列表以获取最新标签
+        await loadBaseData();
       } finally {
         tagSubmitting.value = false;
       }
@@ -463,12 +479,11 @@ const handleCreateTag = async () => {
 };
 
 // ============================================================
-// 初始化：加载分类/标签 + 编辑时回显
+// 初始化：加载分类 + 编辑时回显
 // ============================================================
 const loadBaseData = async () => {
-  const [categories, tags] = await Promise.all([getCategoryList(), getTagList()]);
+  const categories = await getCategoryList();
   categoryList.value = categories;
-  tagList.value = tags;
 };
 
 const loadArticleDetail = async (id: string) => {

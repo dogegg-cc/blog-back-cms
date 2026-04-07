@@ -7,7 +7,7 @@
             v-model="queryParams.categoryId"
             placeholder="请选择分类"
             clearable
-            @change="handleQuery"
+            @change="handleCategoryChange"
           >
             <el-option
               v-for="item in categoryList"
@@ -22,9 +22,15 @@
             v-model="queryParams.tagId"
             placeholder="请选择标签"
             clearable
+            :disabled="!queryParams.categoryId"
             @change="handleQuery"
           >
-            <el-option v-for="item in tagList" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option
+              v-for="item in availableTags"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -115,13 +121,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Plus } from "@element-plus/icons-vue";
 import { getArticleList, deleteArticles } from "@/api/article";
 import { getCategoryList } from "@/api/category";
-import { getTagList } from "@/api/tag";
-import type { ArticleListItem, ArticleQuery, CategoryResponse, TagResponse } from "@/api/types";
+import type { ArticleListItem, ArticleQuery, CategoryResponse } from "@/api/types";
 import { getFullImageUrl } from "@/utils/url";
 import { ElMessage, ElMessageBox } from "element-plus";
 import dayjs from "dayjs";
@@ -134,7 +139,6 @@ const loading = ref(false);
 const articleList = ref<ArticleListItem[]>([]);
 const total = ref(0);
 const categoryList = ref<CategoryResponse[]>([]);
-const tagList = ref<TagResponse[]>([]);
 const selectedIds = ref<string[]>([]);
 
 // 查询参数
@@ -145,12 +149,18 @@ const queryParams = reactive({
   tagId: undefined as string | undefined,
 });
 
+// 计算当前分类下的可选标签
+const availableTags = computed(() => {
+  if (!queryParams.categoryId) return [];
+  const category = categoryList.value.find((c) => c.id === queryParams.categoryId);
+  return category?.tags || [];
+});
+
 // 获取基础数据
 const fetchStaticData = async () => {
   try {
-    const [categories, tags] = await Promise.all([getCategoryList(), getTagList()]);
+    const categories = await getCategoryList();
     categoryList.value = categories;
-    tagList.value = tags;
   } catch (error) {
     console.error("获取基础数据失败", error);
   }
@@ -173,6 +183,11 @@ const fetchArticleList = async () => {
 };
 
 // 筛选与分页
+const handleCategoryChange = () => {
+  queryParams.tagId = undefined; // 切换分类时清空标签
+  handleQuery();
+};
+
 const handleQuery = () => {
   queryParams.page = 1;
   fetchArticleList();

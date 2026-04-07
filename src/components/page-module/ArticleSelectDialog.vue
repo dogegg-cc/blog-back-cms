@@ -11,7 +11,13 @@
     <div class="article-select-container">
       <el-form :inline="true" :model="query" class="search-bar" size="default">
         <el-form-item label="分类">
-          <el-select v-model="query.categoryId" placeholder="全部分类" clearable style="width: 150px">
+          <el-select 
+            v-model="query.categoryId" 
+            placeholder="全部分类" 
+            clearable 
+            style="width: 150px"
+            @change="handleCategoryChange"
+          >
             <el-option
               v-for="item in categories"
               :key="item.id"
@@ -22,9 +28,15 @@
         </el-form-item>
 
         <el-form-item label="标签">
-          <el-select v-model="query.tagId" placeholder="全部标签" clearable style="width: 150px">
+          <el-select 
+            v-model="query.tagId" 
+            placeholder="全部标签" 
+            clearable 
+            :disabled="!query.categoryId"
+            style="width: 150px"
+          >
             <el-option
-              v-for="item in tags"
+              v-for="item in availableTags"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -105,13 +117,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { Search, Check } from '@element-plus/icons-vue';
 import { getArticleList } from '@/api/article';
 import { getCategoryList } from '@/api/category';
-import { getTagList } from '@/api/tag';
 import { getFullImageUrl } from '@/utils/url';
-import type { ArticleListItem, CategoryResponse, TagResponse } from '@/api/types';
+import type { ArticleListItem, CategoryResponse } from '@/api/types';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -127,7 +138,6 @@ const selectedArticles = ref<ArticleListItem[]>([]);
 
 // 元数据
 const categories = ref<CategoryResponse[]>([]);
-const tags = ref<TagResponse[]>([]);
 
 const query = reactive({
   page: 1,
@@ -135,6 +145,17 @@ const query = reactive({
   categoryId: '',
   tagId: '',
 });
+
+// 计算当前分类下的可用标签
+const availableTags = computed(() => {
+  if (!query.categoryId) return [];
+  const category = categories.value.find(c => c.id === query.categoryId);
+  return category?.tags || [];
+});
+
+const handleCategoryChange = () => {
+  query.tagId = ''; // 切换分类时清空标签
+};
 
 watch(() => props.modelValue, (val) => {
   visible.value = val;
@@ -150,9 +171,8 @@ watch(visible, (val) => {
 
 const loadMeta = async () => {
   try {
-    const [cData, tData] = await Promise.all([getCategoryList(), getTagList()]);
+    const cData = await getCategoryList();
     categories.value = cData;
-    tags.value = tData;
   } catch (error) {
     console.error('Failed to load metadata', error);
   }
