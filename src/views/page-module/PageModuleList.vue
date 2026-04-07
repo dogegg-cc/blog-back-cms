@@ -16,7 +16,7 @@
         <el-table-column label="类型" width="120">
           <template #default="{ row }">
             <el-tag :type="row.type === 'POST_LIST' ? 'success' : 'warning'">
-              {{ typeMap[row.type] || row.type }}
+              {{ PAGE_MODULE_TYPE_MAP[row.type] || row.type }}
             </el-tag>
           </template>
         </el-table-column>
@@ -25,7 +25,7 @@
 
         <el-table-column prop="styleType" label="样式类型" width="100" align="center">
             <template #default="{ row }">
-                <el-tag effect="plain">{{ row.styleType }}</el-tag>
+                <el-tag effect="plain">{{ PAGE_MODULE_STYLE_MAP[row.styleType] || row.styleType }}</el-tag>
             </template>
         </el-table-column>
 
@@ -65,16 +65,12 @@ import { useRouter } from "vue-router";
 import { Plus } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getPageModuleList, deletePageModule, updatePageModule } from "@/api/page-module";
+import { PAGE_MODULE_TYPE_MAP, PAGE_MODULE_STYLE_MAP } from "@/config/pageModule";
 import type { PageModuleResponseDto } from "@/api/types";
 
 const router = useRouter();
 const loading = ref(false);
 const moduleList = ref<(PageModuleResponseDto & { statusLoading?: boolean })[]>([]);
-
-const typeMap: Record<string, string> = {
-  POST_LIST: "文章列表",
-  PHOTO_GALLERY: "照片集",
-};
 
 const loadData = async () => {
   loading.value = true;

@@ -20,16 +20,12 @@
         <el-col :span="8">
           <el-form-item label="类型" prop="type">
             <el-select v-model="form.type" :disabled="isEdit" placeholder="内容载体类型" style="width: 100%" @change="handleTypeChange">
-              <el-option label="文章列表" value="POST_LIST" />
-              <el-option label="照片集" value="PHOTO_GALLERY" />
+              <el-option v-for="item in PAGE_MODULE_TYPES" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="样式" prop="styleType">
             <el-select v-model="form.styleType" placeholder="渲染样式" style="width: 100%">
-              <el-option label="默认样式" value="default" />
-              <el-option label="列表样式" value="list" />
-              <el-option label="网格样式" value="grid" />
-              <el-option label="幻灯片" value="carousel" />
+              <el-option v-for="item in PAGE_MODULE_STYLE_TYPES" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="排序权重" prop="sortOrder">
@@ -157,6 +153,7 @@ import { ElMessage, type FormInstance, type UploadProps } from 'element-plus';
 import ArticleSelectDialog from './ArticleSelectDialog.vue';
 import { getToken } from '@/utils/auth';
 import { IMAGE_BASE_URL, getFullImageUrl } from '@/utils/url';
+import { PAGE_MODULE_TYPES, PAGE_MODULE_STYLE_TYPES } from '@/config/pageModule';
 import type { PageModuleResponseDto, CreatePageModuleParams, ArticleSummaryDto, ArticleListItem } from '@/api/types';
 import draggable from 'vuedraggable';
 
