@@ -105,6 +105,7 @@
             :headers="{ dogtoken: getToken() ?? '' }"
             :show-file-list="false"
             name="file"
+            multiple
             :on-success="handleUploadSuccess"
             :before-upload="beforeUpload"
           >
