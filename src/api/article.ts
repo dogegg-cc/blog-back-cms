@@ -13,7 +13,7 @@ import type {
  */
 export function getArticleList(params: ArticleQuery) {
   return request<PaginatedResult<ArticleListItem>>({
-    url: "/api/blog/article/list",
+    url: "/api/cms/article/list",
     method: "get",
     params,
   });
@@ -24,7 +24,7 @@ export function getArticleList(params: ArticleQuery) {
  */
 export function deleteArticles(ids: string[]) {
   return request({
-    url: "/api/blog/article/delete",
+    url: "/api/cms/article/delete",
     method: "delete",
     data: { ids },
   });
@@ -35,7 +35,7 @@ export function deleteArticles(ids: string[]) {
  */
 export function getArticleDetail(id: string) {
   return request<ArticleDetail>({
-    url: `/api/blog/article/${id}`,
+    url: `/api/cms/article/${id}`,
     method: "get",
   });
 }
@@ -45,7 +45,7 @@ export function getArticleDetail(id: string) {
  */
 export function createArticle(data: CreateArticleParams) {
   return request<ArticleDetail>({
-    url: "/api/blog/article/add",
+    url: "/api/cms/article/add",
     method: "post",
     data,
   });
@@ -56,7 +56,7 @@ export function createArticle(data: CreateArticleParams) {
  */
 export function updateArticle(id: string, data: UpdateArticleParams) {
   return request<ArticleDetail>({
-    url: `/api/blog/article/update/${id}`,
+    url: `/api/cms/article/update/${id}`,
     method: "put",
     data,
   });
