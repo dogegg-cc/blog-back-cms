@@ -61,7 +61,12 @@
         <!-- 简介 -->
         <el-card shadow="never" class="aside-card">
           <template #header>
-            <span class="card-title">简介</span>
+            <div class="card-header-with-action">
+              <span class="card-title">简介</span>
+              <el-tooltip content="清除 Markdown 格式" placement="top">
+                <el-button type="primary" size="small" :icon="Brush" @click="handleStripSummary" />
+              </el-tooltip>
+            </div>
           </template>
           <el-input
             v-model="form.summary"
@@ -174,17 +179,13 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { Plus, Delete, ArrowLeft, Check } from "@element-plus/icons-vue";
+import { Plus, Delete, ArrowLeft, Check, Brush } from "@element-plus/icons-vue";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
 import { getArticleDetail, createArticle, updateArticle } from "@/api/article";
 import { getCategoryList, createCategory } from "@/api/category";
 import { createTag } from "@/api/tag";
-import type {
-  CategoryResponse,
-  CreateCategoryParams,
-  CreateTagParams,
-} from "@/api/types";
+import type { CategoryResponse, CreateCategoryParams, CreateTagParams } from "@/api/types";
 import { getToken } from "@/utils/auth";
 import { IMAGE_BASE_URL, getFullImageUrl, contentToHalfPath, contentToFullPath } from "@/utils/url";
 import { ElMessage } from "element-plus";
@@ -230,6 +231,23 @@ const availableTags = computed(() => {
 
 const handleCategoryChange = () => {
   form.tagIds = []; // 切换分类时清空选中的标签
+};
+
+// 清除简介中的 Markdown 格式
+const handleStripSummary = () => {
+  if (!form.summary) return;
+
+  // 简单的正则清除 Markdown 格式
+  const cleanText = form.summary
+    .replace(/[#*`~]|^\s*[-+*]\s|^\s*\d+\.\s/gm, "") // 移除标题符号、列表符号、加粗、斜体、删除线、代码符
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // 移除链接，保留文本 [text](url) -> text
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "") // 移除图片
+    .replace(/>\s+/g, "") // 移除引用符号
+    .replace(/\n+/g, " ") // 换行替换为空格
+    .trim();
+
+  form.summary = cleanText;
+  ElMessage.success("已清除 Markdown 格式");
 };
 
 // Banner 相关（半路径存服务器，完整 URL 仅用于预览）
@@ -463,9 +481,9 @@ const handleCreateTag = async () => {
     if (valid) {
       tagSubmitting.value = true;
       try {
-        await createTag({ 
+        await createTag({
           name: tagForm.name,
-          categoryId: tagForm.categoryId 
+          categoryId: tagForm.categoryId,
         });
         ElMessage.success("标签创建成功");
         tagDialogVisible.value = false;
