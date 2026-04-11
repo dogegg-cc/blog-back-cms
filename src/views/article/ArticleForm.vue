@@ -2,7 +2,7 @@
   <div class="article-form-container">
     <!-- 顶部操作栏 -->
     <div class="form-topbar">
-      <el-button :icon="ArrowLeft" @click="router.push('/article/list')">返回列表</el-button>
+      <el-button :icon="ArrowLeft" @click="handleBack">返回列表</el-button>
       <div class="topbar-title">{{ isEdit ? "编辑文章" : "新建文章" }}</div>
       <el-button type="primary" :loading="submitting" :icon="Check" @click="handleSubmit">
         {{ isEdit ? "保存修改" : "发布文章" }}
@@ -407,11 +407,19 @@ const handleSubmit = async () => {
       await createArticle(payload);
       ElMessage.success("文章发布成功");
     }
-    router.push("/article/list");
+    handleBack();
   } catch (error) {
     console.error("提交失败", error);
   } finally {
     submitting.value = false;
+  }
+};
+
+const handleBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push("/article/list");
   }
 };
 

@@ -121,8 +121,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, computed, onMounted, watch } from "vue";
+import { useRouter, useRoute, type LocationQueryRaw } from "vue-router";
 import { Plus } from "@element-plus/icons-vue";
 import { getArticleList, deleteArticles } from "@/api/article";
 import { getCategoryList } from "@/api/category";
@@ -133,6 +133,7 @@ import dayjs from "dayjs";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, DATE_FORMAT } from "@/config/constants";
 
 const router = useRouter();
+const route = useRoute();
 
 // 数据加载状态
 const loading = ref(false);
@@ -155,6 +156,34 @@ const availableTags = computed(() => {
   const category = categoryList.value.find((c) => c.id === queryParams.categoryId);
   return category?.tags || [];
 });
+
+// 从 URL 同步参数到响应式变量
+const syncQueryParamsFromUrl = () => {
+  const query = route.query;
+  if (query.page) queryParams.page = Number(query.page);
+  if (query.limit) queryParams.limit = Number(query.limit);
+  if (query.categoryId) queryParams.categoryId = query.categoryId as string;
+  if (query.tagId) queryParams.tagId = query.tagId as string;
+};
+
+// 监听参数变化，同步到 URL
+watch(
+  () => ({ ...queryParams }),
+  (newParams) => {
+    const query: LocationQueryRaw = {};
+    // 只同步非默认/非空参数
+    if (newParams.page !== 1) query.page = newParams.page;
+    if (newParams.limit !== DEFAULT_PAGE_SIZE) query.limit = newParams.limit;
+    if (newParams.categoryId) query.categoryId = newParams.categoryId;
+    if (newParams.tagId) query.tagId = newParams.tagId;
+
+    router.replace({
+      path: route.path,
+      query,
+    });
+  },
+  { deep: true },
+);
 
 // 获取基础数据
 const fetchStaticData = async () => {
@@ -258,8 +287,9 @@ const doDelete = async (ids: string[]) => {
   }
 };
 
-onMounted(() => {
-  fetchStaticData();
+onMounted(async () => {
+  await fetchStaticData();
+  syncQueryParamsFromUrl();
   fetchArticleList();
 });
 </script>
