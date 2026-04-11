@@ -157,6 +157,7 @@ import { IMAGE_BASE_URL, getFullImageUrl } from '@/utils/url';
 import { PAGE_MODULE_TYPES, PAGE_MODULE_STYLE_TYPES } from '@/config/pageModule';
 import type { PageModuleResponseDto, CreatePageModuleParams, ArticleSummaryDto, ArticleListItem } from '@/api/types';
 import draggable from 'vuedraggable';
+import { processImageBeforeUpload } from "@/utils/image";
 
 const props = defineProps<{
   initialData?: PageModuleResponseDto | null;
@@ -246,13 +247,12 @@ const getCardStyle = (item: ArticleSummaryDto) => {
   };
 };
 
-const beforeUpload: UploadProps['beforeUpload'] = (file) => {
-  const isImage = file.type.startsWith('image/');
-  const isLt5M = file.size / 1024 / 1024 < 5;
-
-  if (!isImage) ElMessage.error('只能上传图片文件!');
-  if (!isLt5M) ElMessage.error('图片大小不能超过 5MB!');
-  return isImage && isLt5M;
+const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+  try {
+    return await processImageBeforeUpload(file);
+  } catch {
+    return false;
+  }
 };
 
 const handleUploadSuccess: UploadProps['onSuccess'] = (res) => {

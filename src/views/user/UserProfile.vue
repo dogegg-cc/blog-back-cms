@@ -84,6 +84,7 @@ import { IMAGE_BASE_URL, getFullImageUrl } from "@/utils/url";
 import { getToken } from "@/utils/auth";
 import { ElMessage, type FormInstance, type UploadProps } from "element-plus";
 import { Plus, Share } from "@element-plus/icons-vue";
+import { processImageBeforeUpload } from "@/utils/image";
 import type { UpdateUserParams } from "@/api/types";
 
 const userStore = useUserStore();
@@ -120,19 +121,12 @@ onMounted(() => {
 });
 
 // 头像上传逻辑
-const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
-  if (
-    rawFile.type !== "image/jpeg" &&
-    rawFile.type !== "image/png" &&
-    rawFile.type !== "image/gif"
-  ) {
-    ElMessage.error("头像必须是图片格式 (JPG/PNG/GIF)!");
-    return false;
-  } else if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error("图片大小不能超过 2MB!");
+const beforeAvatarUpload: UploadProps["beforeUpload"] = async (rawFile) => {
+  try {
+    return await processImageBeforeUpload(rawFile);
+  } catch {
     return false;
   }
-  return true;
 };
 
 const handleAvatarSuccess: UploadProps["onSuccess"] = (response) => {

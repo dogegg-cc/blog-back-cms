@@ -185,6 +185,7 @@ import "vditor/dist/index.css";
 import { getArticleDetail, createArticle, updateArticle } from "@/api/article";
 import { getCategoryList, createCategory } from "@/api/category";
 import { createTag } from "@/api/tag";
+import { processImageBeforeUpload } from "@/utils/image";
 import type { CategoryResponse, CreateCategoryParams, CreateTagParams } from "@/api/types";
 import { getToken } from "@/utils/auth";
 import { IMAGE_BASE_URL, getFullImageUrl, contentToHalfPath, contentToFullPath } from "@/utils/url";
@@ -300,9 +301,17 @@ const initEditor = (content = "") => {
     ],
     upload: {
       // 完全接管上传流程：手动 fetch → 解析半路径 → 拼接完整 URL → 插入 Markdown
-      handler(files: File[]) {
-        const file = files[0];
+      async handler(files: File[]) {
+        let file = files[0];
         if (!file) return null;
+
+        try {
+          // 统一校验 + 压缩处理
+          file = (await processImageBeforeUpload(file)) as File;
+        } catch {
+          // 校验不通过
+          return null;
+        }
 
         const formData = new FormData();
         formData.append("file", file);
@@ -341,18 +350,15 @@ const initEditor = (content = "") => {
 // ============================================================
 // Banner 上传
 // ============================================================
-const beforeBannerUpload = (file: File) => {
-  const isImage = file.type.startsWith("image/");
-  const isLt5M = file.size / 1024 / 1024 < 5;
-  if (!isImage) {
-    ElMessage.error("只能上传图片文件！");
+const beforeBannerUpload = async (file: File) => {
+  try {
+    // 统一校验与处理 (返回处理后的 Blob/File 或抛出错误拦截)
+    const result = await processImageBeforeUpload(file);
+    return result;
+  } catch {
+    // 校验失败会在工具类里报错给用户，此处只需返回 false 阻止上传
     return false;
   }
-  if (!isLt5M) {
-    ElMessage.error("图片大小不能超过 5MB！");
-    return false;
-  }
-  return true;
 };
 
 interface UploadResponse {
