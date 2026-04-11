@@ -150,8 +150,9 @@ const handleAvatarSuccess: UploadProps["onSuccess"] = (response) => {
 
 // 从媒体库选择处理
 const handleMediaSelect = (urls: string[]) => {
-  if (urls.length > 0) {
-    form.avatar = urls[0];
+  const url = urls[0];
+  if (url) {
+    form.avatar = url;
     ElMessage.success("已从媒体库选择头像");
   }
 };

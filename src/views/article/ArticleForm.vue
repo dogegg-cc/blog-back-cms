@@ -219,8 +219,8 @@ const openMediaSelect = (target: "banner" | "editor") => {
 
 // 处理媒体库选择结果
 const handleMediaSelect = (urls: string[]) => {
-  if (urls.length === 0) return;
-  const url = urls[0]; // 单选场景
+  const url = urls[0];
+  if (!url) return;
 
   if (mediaSelectTarget.value === "banner") {
     bannerPath.value = url;
