@@ -1,31 +1,51 @@
 <template>
-  <el-form
-    ref="formRef"
-    :model="form"
-    :rules="rules"
-    label-width="120px"
-    class="page-module-form"
-  >
+  <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" class="page-module-form">
     <div class="form-body">
       <div class="section-title">基本配置</div>
       <el-row :gutter="40">
         <el-col :span="16">
           <el-form-item label="模块标题" prop="title">
-            <el-input v-model="form.title" placeholder="主要显示的标题名称" maxlength="50" show-word-limit />
+            <el-input
+              v-model="form.title"
+              placeholder="主要显示的标题名称"
+              maxlength="50"
+              show-word-limit
+            />
           </el-form-item>
           <el-form-item label="模块简介" prop="intro">
-            <el-input v-model="form.intro" type="textarea" :rows="3" placeholder="模块的描述信息（可选）" />
+            <el-input
+              v-model="form.intro"
+              type="textarea"
+              :rows="3"
+              placeholder="模块的描述信息（可选）"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="类型" prop="type">
-            <el-select v-model="form.type" :disabled="isEdit" placeholder="内容载体类型" style="width: 100%" @change="handleTypeChange">
-              <el-option v-for="item in PAGE_MODULE_TYPES" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              v-model="form.type"
+              :disabled="isEdit"
+              placeholder="内容载体类型"
+              style="width: 100%"
+              @change="handleTypeChange"
+            >
+              <el-option
+                v-for="item in PAGE_MODULE_TYPES"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="样式" prop="styleType">
             <el-select v-model="form.styleType" placeholder="渲染样式" style="width: 100%">
-              <el-option v-for="item in PAGE_MODULE_STYLE_TYPES" :key="item.value" :label="item.label" :value="item.value" />
+              <el-option
+                v-for="item in PAGE_MODULE_STYLE_TYPES"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="排序权重" prop="sortOrder">
@@ -44,13 +64,15 @@
       <div v-if="form.type === 'POST_LIST'" class="content-config-card">
         <div class="content-header">
           <div class="tip">已选择的文章将按顺序在此模块中展示（可调整顺序）</div>
-          <el-button type="primary" :icon="Plus" @click="showArticleSelect = true">选取文章</el-button>
+          <el-button type="primary" :icon="Plus" @click="showArticleSelect = true"
+            >选取文章</el-button
+          >
         </div>
-        
+
         <div class="article-grid-container">
-          <draggable 
-            v-model="selectedArticles" 
-            item-key="id" 
+          <draggable
+            v-model="selectedArticles"
+            item-key="id"
             class="article-grid"
             animation="300"
             ghost-class="ghost-card"
@@ -60,10 +82,12 @@
                 <div class="article-card" :style="getCardStyle(element)">
                   <!-- 蒙版 -->
                   <div class="card-mask"></div>
-                  
+
                   <!-- 操作按钮 (右上角) -->
                   <div class="card-actions">
-                    <el-icon class="action-btn del" @click.stop="removeArticle(index)"><Delete /></el-icon>
+                    <el-icon class="action-btn del" @click.stop="removeArticle(index)"
+                      ><Delete
+                    /></el-icon>
                   </div>
 
                   <!-- 分类标签 (左上角) -->
@@ -74,7 +98,7 @@
                   <!-- 内容 -->
                   <div class="card-content">
                     <h4 class="card-title">{{ element.title }}</h4>
-                    <p class="card-intro">{{ element.summary || '暂无简介' }}</p>
+                    <p class="card-intro">{{ element.summary || "暂无简介" }}</p>
                     <div class="card-tags">
                       <span v-for="tag in element.tags?.slice(0, 2)" :key="tag.id" class="mini-tag">
                         #{{ tag.name }}
@@ -100,26 +124,32 @@
       <div v-else-if="form.type === 'PHOTO_GALLERY'" class="content-config-card">
         <div class="content-header">
           <div class="tip">支持上传多张照片，支持拖拽排序</div>
-          <el-upload
-            :action="`${IMAGE_BASE_URL}/api/upload/image`"
-            :headers="{ dogtoken: getToken() ?? '' }"
-            :show-file-list="false"
-            name="file"
-            multiple
-            :on-success="handleUploadSuccess"
-            :before-upload="beforeUpload"
-          >
-            <el-button type="primary" :icon="Upload">上传照片</el-button>
-          </el-upload>
+          <div class="button-items">
+            <el-upload
+              :action="`${IMAGE_BASE_URL}/api/upload/image`"
+              :headers="{ dogtoken: getToken() ?? '' }"
+              :show-file-list="false"
+              name="file"
+              multiple
+              :on-success="handleUploadSuccess"
+              :before-upload="beforeUpload"
+            >
+              <el-button type="primary" :icon="Upload">上传照片</el-button>
+            </el-upload>
+            <el-button
+              type="primary"
+              plain
+              :icon="Plus"
+              @click="mediaDialogVisible = true"
+              style="margin-left: 12px"
+            >
+              媒体库选取
+            </el-button>
+          </div>
         </div>
-        
+
         <div class="photo-gallery-container">
-          <draggable 
-            v-model="imageUrls" 
-            item-key="index" 
-            class="photo-grid"
-            animation="300"
-          >
+          <draggable v-model="imageUrls" item-key="index" class="photo-grid" animation="300">
             <template #item="{ element, index }">
               <div class="photo-card">
                 <el-image :src="getFullImageUrl(element)" fit="cover" class="photo-img" />
@@ -144,19 +174,25 @@
     </div>
 
     <ArticleSelectDialog v-model="showArticleSelect" @select="handleArticlesSelect" />
+    <MediaSelectDialog v-model="mediaDialogVisible" multiple @select="handleMediaSelect" />
   </el-form>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue';
-import { Plus, Delete, Upload, Rank } from '@element-plus/icons-vue';
-import { ElMessage, type FormInstance, type UploadProps } from 'element-plus';
-import ArticleSelectDialog from './ArticleSelectDialog.vue';
-import { getToken } from '@/utils/auth';
-import { IMAGE_BASE_URL, getFullImageUrl } from '@/utils/url';
-import { PAGE_MODULE_TYPES, PAGE_MODULE_STYLE_TYPES } from '@/config/pageModule';
-import type { PageModuleResponseDto, CreatePageModuleParams, ArticleSummaryDto, ArticleListItem } from '@/api/types';
-import draggable from 'vuedraggable';
+import { ref, reactive, watch, computed } from "vue";
+import { Plus, Delete, Upload, Rank } from "@element-plus/icons-vue";
+import { ElMessage, type FormInstance, type UploadProps } from "element-plus";
+import ArticleSelectDialog from "./ArticleSelectDialog.vue";
+import { getToken } from "@/utils/auth";
+import { IMAGE_BASE_URL, getFullImageUrl } from "@/utils/url";
+import { PAGE_MODULE_TYPES, PAGE_MODULE_STYLE_TYPES } from "@/config/pageModule";
+import type {
+  PageModuleResponseDto,
+  CreatePageModuleParams,
+  ArticleSummaryDto,
+  ArticleListItem,
+} from "@/api/types";
+import draggable from "vuedraggable";
 import { processImageBeforeUpload } from "@/utils/image";
 
 const props = defineProps<{
@@ -164,17 +200,18 @@ const props = defineProps<{
   submitting?: boolean;
 }>();
 
-const emit = defineEmits(['save', 'cancel']);
+const emit = defineEmits(["save", "cancel"]);
 
 const formRef = ref<FormInstance>();
 const showArticleSelect = ref(false);
+const mediaDialogVisible = ref(false);
 const isEdit = computed(() => !!props.initialData);
 
 const form = reactive<CreatePageModuleParams>({
-  title: '',
-  type: 'POST_LIST',
-  intro: '',
-  styleType: 'default',
+  title: "",
+  type: "POST_LIST",
+  intro: "",
+  styleType: "default",
   sortOrder: 0,
   isActive: true,
   content: {
@@ -187,45 +224,49 @@ const selectedArticles = ref<ArticleSummaryDto[]>([]);
 const imageUrls = ref<string[]>([]);
 
 const rules = {
-  title: [{ required: true, message: '请输入模块标题', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择内容类型', trigger: 'change' }],
-  styleType: [{ required: true, message: '请选择样式类型', trigger: 'change' }],
+  title: [{ required: true, message: "请输入模块标题", trigger: "blur" }],
+  type: [{ required: true, message: "请选择内容类型", trigger: "change" }],
+  styleType: [{ required: true, message: "请选择样式类型", trigger: "change" }],
 };
 
-watch(() => props.initialData, (val) => {
-  if (val) {
-    Object.assign(form, {
-      title: val.title,
-      type: val.type,
-      intro: val.intro || '',
-      styleType: val.styleType,
-      sortOrder: val.sortOrder,
-      isActive: val.isActive,
-      content: {
-        articleIds: val.content.articleIds || [],
-        imageUrls: val.content.imageUrls || [],
-      },
-    });
-    selectedArticles.value = val.content.articles || [];
-    imageUrls.value = val.content.imageUrls || [];
-  }
-}, { immediate: true });
+watch(
+  () => props.initialData,
+  (val) => {
+    if (val) {
+      Object.assign(form, {
+        title: val.title,
+        type: val.type,
+        intro: val.intro || "",
+        styleType: val.styleType,
+        sortOrder: val.sortOrder,
+        isActive: val.isActive,
+        content: {
+          articleIds: val.content.articleIds || [],
+          imageUrls: val.content.imageUrls || [],
+        },
+      });
+      selectedArticles.value = val.content.articles || [];
+      imageUrls.value = val.content.imageUrls || [];
+    }
+  },
+  { immediate: true },
+);
 
 const handleTypeChange = () => {
-    // 切换类型时可以添加一些确认逻辑（如果已有数据）
+  // 切换类型时可以添加一些确认逻辑（如果已有数据）
 };
 
 const handleArticlesSelect = (articles: ArticleListItem[]) => {
-  const existingIds = new Set(selectedArticles.value.map(a => a.id));
+  const existingIds = new Set(selectedArticles.value.map((a) => a.id));
   const newArticles = articles
-    .filter(a => !existingIds.has(a.id))
-    .map(a => ({
+    .filter((a) => !existingIds.has(a.id))
+    .map((a) => ({
       id: a.id,
       title: a.title,
       summary: a.summary,
       bannerUrl: a.bannerUrl,
       category: a.category,
-      tags: a.tags
+      tags: a.tags,
     }));
   selectedArticles.value = [...selectedArticles.value, ...newArticles];
 };
@@ -238,16 +279,16 @@ const getCardStyle = (item: ArticleSummaryDto) => {
   if (item.bannerUrl) {
     return {
       backgroundImage: `url(${getFullImageUrl(item.bannerUrl)})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
+      backgroundSize: "cover",
+      backgroundPosition: "center",
     };
   }
   return {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
   };
 };
 
-const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+const beforeUpload: UploadProps["beforeUpload"] = async (file) => {
   try {
     return await processImageBeforeUpload(file);
   } catch {
@@ -255,12 +296,19 @@ const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
   }
 };
 
-const handleUploadSuccess: UploadProps['onSuccess'] = (res) => {
+const handleMediaSelect = (urls: string[]) => {
+  if (urls.length > 0) {
+    imageUrls.value.push(...urls);
+    ElMessage.success(`成功从媒体库导入 ${urls.length} 张图片`);
+  }
+};
+
+const handleUploadSuccess: UploadProps["onSuccess"] = (res) => {
   if (res.code === 1 && res.data?.url) {
     imageUrls.value.push(res.data.url);
-    ElMessage.success('上传成功');
+    ElMessage.success("上传成功");
   } else {
-    ElMessage.error(res.message || '上传失败');
+    ElMessage.error(res.message || "上传失败");
   }
 };
 
@@ -273,14 +321,14 @@ const submitForm = async () => {
   await formRef.value.validate((valid) => {
     if (valid) {
       const payload = { ...form };
-      if (form.type === 'POST_LIST') {
-        payload.content.articleIds = selectedArticles.value.map(a => a.id);
+      if (form.type === "POST_LIST") {
+        payload.content.articleIds = selectedArticles.value.map((a) => a.id);
         payload.content.imageUrls = [];
       } else {
         payload.content.imageUrls = [...imageUrls.value];
         payload.content.articleIds = [];
       }
-      emit('save', payload);
+      emit("save", payload);
     }
   });
 };
@@ -317,6 +365,12 @@ const submitForm = async () => {
         font-size: 14px;
         color: #909399;
       }
+      .button-items {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+      }
     }
   }
 
@@ -336,12 +390,12 @@ const submitForm = async () => {
       height: 160px;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s;
 
       &:hover {
         transform: scale(1.02);
-        
+
         .card-actions {
           opacity: 1;
         }
@@ -350,7 +404,12 @@ const submitForm = async () => {
       .card-mask {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.85) 0%,
+          rgba(0, 0, 0, 0.2) 60%,
+          transparent 100%
+        );
         z-index: 1;
       }
 
@@ -485,7 +544,9 @@ const submitForm = async () => {
           color: #fff;
           font-size: 24px;
           cursor: pointer;
-          &:hover { color: #f56c6c; }
+          &:hover {
+            color: #f56c6c;
+          }
         }
       }
 

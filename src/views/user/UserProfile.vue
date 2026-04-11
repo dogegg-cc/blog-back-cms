@@ -67,11 +67,19 @@
                   <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                   <div class="upload-tip">点击上传新头像</div>
                 </el-upload>
+                <div style="margin-top: 12px">
+                  <el-button link type="primary" @click="mediaDialogVisible = true">
+                    从媒体库选择
+                  </el-button>
+                </div>
               </div>
             </el-form-item>
           </div>
         </div>
       </el-form>
+
+      <!-- 媒体库选择弹窗 -->
+      <MediaSelectDialog v-model="mediaDialogVisible" :multiple="false" @select="handleMediaSelect" />
     </el-card>
   </div>
 </template>
@@ -85,12 +93,14 @@ import { getToken } from "@/utils/auth";
 import { ElMessage, type FormInstance, type UploadProps } from "element-plus";
 import { Plus, Share } from "@element-plus/icons-vue";
 import { processImageBeforeUpload } from "@/utils/image";
+import MediaSelectDialog from "@/components/media/MediaSelectDialog.vue";
 import type { UpdateUserParams } from "@/api/types";
 
 const userStore = useUserStore();
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 const submitting = ref(false);
+const mediaDialogVisible = ref(false);
 
 const form = reactive({
   name: "",
@@ -135,6 +145,14 @@ const handleAvatarSuccess: UploadProps["onSuccess"] = (response) => {
     ElMessage.success("上传成功");
   } else {
     ElMessage.error("上传失败");
+  }
+};
+
+// 从媒体库选择处理
+const handleMediaSelect = (urls: string[]) => {
+  if (urls.length > 0) {
+    form.avatar = urls[0];
+    ElMessage.success("已从媒体库选择头像");
   }
 };
 

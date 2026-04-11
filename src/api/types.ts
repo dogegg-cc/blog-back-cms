@@ -216,3 +216,15 @@ export interface CreatePageModuleParams {
  * 更新首页模块参数
  */
 export type UpdatePageModuleParams = Partial<CreatePageModuleParams>;
+/**
+ * 媒体库单项数据
+ */
+export interface MediaItem {
+  url: string;
+  name: string;
+}
+
+/**
+ * 媒体库分页返回
+ */
+export type PaginatedMediaResult = PaginatedResult<MediaItem>;

@@ -56,6 +56,11 @@
               <div class="upload-tip-sub">支持 JPG / PNG / WebP</div>
             </div>
           </el-upload>
+          <div style="margin-top: 10px; text-align: center;">
+            <el-button link type="primary" :icon="Check" @click="openMediaSelect('banner')">
+              从媒体库选择
+            </el-button>
+          </div>
         </el-card>
 
         <!-- 简介 -->
@@ -173,6 +178,13 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 媒体库选择弹窗 -->
+    <MediaSelectDialog
+      v-model="mediaDialogVisible"
+      :multiple="false"
+      @select="handleMediaSelect"
+    />
   </div>
 </template>
 
@@ -186,6 +198,7 @@ import { getArticleDetail, createArticle, updateArticle } from "@/api/article";
 import { getCategoryList, createCategory } from "@/api/category";
 import { createTag } from "@/api/tag";
 import { processImageBeforeUpload } from "@/utils/image";
+import MediaSelectDialog from "@/components/media/MediaSelectDialog.vue";
 import type { CategoryResponse, CreateCategoryParams, CreateTagParams } from "@/api/types";
 import { getToken } from "@/utils/auth";
 import { IMAGE_BASE_URL, getFullImageUrl, contentToHalfPath, contentToFullPath } from "@/utils/url";
@@ -194,6 +207,29 @@ import type { FormInstance, FormRules } from "element-plus";
 
 const router = useRouter();
 const route = useRoute();
+
+// 图库选择弹窗控制
+const mediaDialogVisible = ref(false);
+const mediaSelectTarget = ref<"banner" | "editor">("banner");
+
+const openMediaSelect = (target: "banner" | "editor") => {
+  mediaSelectTarget.value = target;
+  mediaDialogVisible.value = true;
+};
+
+// 处理媒体库选择结果
+const handleMediaSelect = (urls: string[]) => {
+  if (urls.length === 0) return;
+  const url = urls[0]; // 单选场景
+
+  if (mediaSelectTarget.value === "banner") {
+    bannerPath.value = url;
+    ElMessage.success("设置封面成功");
+  } else if (mediaSelectTarget.value === "editor") {
+    const fullUrl = getFullImageUrl(url);
+    vditorInstance?.insertValue(`![](${fullUrl})\n`);
+  }
+};
 
 // ============================================================
 // 页面模式 : 编辑 vs 新建
@@ -293,6 +329,12 @@ const initEditor = (content = "") => {
       "insert-after",
       "|",
       "upload",
+      {
+        name: "media-select",
+        tip: "从媒体库选择",
+        icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zM153.6 832l161.2-211 96.9 126.9L584.1 512l198.4 256.1h-629z" fill="currentColor"></path></svg>',
+        click: () => openMediaSelect("editor"),
+      },
       "link",
       "table",
       "|",
