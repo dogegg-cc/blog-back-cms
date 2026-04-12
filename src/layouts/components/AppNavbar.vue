@@ -14,8 +14,11 @@
     <div class="right">
       <el-dropdown trigger="click">
         <span class="user-info">
-          <el-avatar :size="30" :src="getFullImageUrl(userStore.avatar)" />
-          <span class="username">{{ userStore.name }}</span>
+          <el-avatar
+            :size="30"
+            :src="getFullImageUrl(userStore.userInfo?.avatarItem?.metadata?.thumbnailUrl)"
+          />
+          <span class="username">{{ userStore.userInfo?.name ?? "用户" }}</span>
           <el-icon><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
@@ -49,56 +52,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAppStore } from '@/stores/app'
-import { useUserStore } from '@/stores/user'
-import { Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
-import { removeToken } from '@/utils/auth'
-import { ElMessageBox, ElMessage } from 'element-plus'
-import { logoff } from '@/api/user'
-import { getFullImageUrl } from '@/utils/url'
-import ChangePasswordForm from '@/components/common/ChangePasswordForm.vue'
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
+import { Fold, Expand, ArrowDown } from "@element-plus/icons-vue";
+import { removeToken } from "@/utils/auth";
+import { ElMessageBox, ElMessage } from "element-plus";
+import { logoff } from "@/api/user";
+import { getFullImageUrl } from "@/utils/url";
+import ChangePasswordForm from "@/components/common/ChangePasswordForm.vue";
 
-const route = useRoute()
-const router = useRouter()
-const appStore = useAppStore()
-const userStore = useUserStore()
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+const userStore = useUserStore();
 
 const toggleSidebar = () => {
-  appStore.toggleSidebar()
-}
+  appStore.toggleSidebar();
+};
 
 // 修改密码弹窗控制
-const pwdDialogVisible = ref(false)
-const pwdFormRef = ref<InstanceType<typeof ChangePasswordForm>>()
+const pwdDialogVisible = ref(false);
+const pwdFormRef = ref<InstanceType<typeof ChangePasswordForm>>();
 
 const showUpdatePwd = () => {
-  pwdDialogVisible.value = true
-}
+  pwdDialogVisible.value = true;
+};
 
 const resetPwdForm = () => {
-  pwdFormRef.value?.resetFields()
-}
+  pwdFormRef.value?.resetFields();
+};
 
 const handleLogout = () => {
-  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-    type: 'warning'
-  }).then(async () => {
-    try {
-      await logoff()
-      removeToken()
-      userStore.clearUserInfo()
-      router.push('/login')
-      ElMessage.success('已退出登录')
-    } catch {
-      // 错误由拦截器处理，但仍需清理本地状态以防万一或根据业务决定
-      removeToken()
-      userStore.clearUserInfo()
-      router.push('/login')
-    }
-  }).catch(() => {})
-}
+  ElMessageBox.confirm("确定要退出登录吗？", "提示", {
+    type: "warning",
+  })
+    .then(async () => {
+      try {
+        await logoff();
+        removeToken();
+        userStore.clearUserInfo();
+        router.push("/login");
+        ElMessage.success("已退出登录");
+      } catch {
+        // 错误由拦截器处理，但仍需清理本地状态以防万一或根据业务决定
+        removeToken();
+        userStore.clearUserInfo();
+        router.push("/login");
+      }
+    })
+    .catch(() => {});
+};
 </script>
 
 <style scoped>
@@ -125,7 +130,7 @@ const handleLogout = () => {
 }
 
 .fold-btn:hover {
-  color: #409EFF;
+  color: #409eff;
 }
 
 .user-info {

@@ -79,7 +79,11 @@
       </el-form>
 
       <!-- 媒体库选择弹窗 -->
-      <MediaSelectDialog v-model="mediaDialogVisible" :multiple="false" @select="handleMediaSelect" />
+      <MediaSelectDialog
+        v-model="mediaDialogVisible"
+        :multiple="false"
+        @select="handleMediaSelect"
+      />
     </el-card>
   </div>
 </template>
@@ -94,7 +98,7 @@ import { ElMessage, type FormInstance, type UploadProps } from "element-plus";
 import { Plus, Share } from "@element-plus/icons-vue";
 import { processImageBeforeUpload } from "@/utils/image";
 import MediaSelectDialog from "@/components/media/MediaSelectDialog.vue";
-import type { UpdateUserParams } from "@/api/types";
+import type { PhotoItemDto, UpdateUserParams } from "@/api/types";
 
 const userStore = useUserStore();
 const formRef = ref<FormInstance>();
@@ -108,6 +112,7 @@ const form = reactive({
   github: "",
   slogan: "",
   avatar: "",
+  avatarId: "",
 });
 
 const rules = {
@@ -122,7 +127,8 @@ const initForm = () => {
     form.email = userStore.userInfo.email || "";
     form.github = userStore.userInfo.github || "";
     form.slogan = userStore.userInfo.slogan || "";
-    form.avatar = userStore.userInfo.avatar || "";
+    form.avatar = userStore.userInfo.avatarItem?.metadata?.thumbnailUrl || "";
+    form.avatarId = userStore.userInfo.avatarItem?.id || "";
   }
 };
 
@@ -140,8 +146,10 @@ const beforeAvatarUpload: UploadProps["beforeUpload"] = async (rawFile) => {
 };
 
 const handleAvatarSuccess: UploadProps["onSuccess"] = (response) => {
-  if (response.code === 1 && response.data?.url) {
-    form.avatar = response.data.url;
+  const data = response.data as PhotoItemDto;
+  if (response.code === 1 && data) {
+    form.avatar = data.metadata?.mediumUrl || data.originalUrl;
+    form.avatarId = data.id;
     ElMessage.success("上传成功");
   } else {
     ElMessage.error("上传失败");
@@ -169,7 +177,7 @@ const handleSubmit = async () => {
           email: form.email || undefined,
           github: form.github || undefined,
           slogan: form.slogan || undefined,
-          avatar: form.avatar || undefined,
+          avatarId: form.avatarId || undefined,
         };
         const updatedInfo = await updateInfo(payload);
 

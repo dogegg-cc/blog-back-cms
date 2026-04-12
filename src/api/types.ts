@@ -17,6 +17,33 @@ export interface LoginResponse {
   github?: string | null;
   slogan?: string | null;
   avatar?: string | null;
+  avatarItem?: PhotoItemDto | null;
+}
+
+export interface PhotoMetadataDto {
+  // 图片中等路径
+  mediumUrl: string;
+  // 图片缩略图路径
+  thumbnailUrl: string;
+}
+
+export interface PhotoItemDto {
+  // 图片id
+  id: string;
+  // 图片原始路径
+  originalUrl: string;
+  // 图片元数据
+  metadata?: PhotoMetadataDto | null;
+  // 图片高度
+  height: number;
+  // 图片宽度
+  width: number;
+  // 图片比例
+  ratio: number;
+  // 图片类型
+  mimetype: string;
+  // 创建时间
+  createdAt: string;
 }
 
 /**
@@ -29,6 +56,7 @@ export interface UserInfoDto {
   slogan: string | null;
   avatar: string | null;
   isUpdatePassword: boolean;
+  avatarItem?: PhotoItemDto | null;
 }
 
 /**
@@ -39,7 +67,7 @@ export interface UpdateUserParams {
   email?: string;
   github?: string;
   slogan?: string;
-  avatar?: string;
+  avatarId?: string;
 }
 
 /**
