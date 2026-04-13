@@ -128,7 +128,6 @@ export interface ArticleListItem {
   id: string;
   title: string;
   summary?: string | null;
-  bannerUrl?: string | null;
   bannerItem?: PhotoItemDto | null;
   viewCount: number;
   createdAt: string;
@@ -197,7 +196,6 @@ export interface ArticleSummaryDto {
   id: string;
   title: string;
   summary?: string | null;
-  bannerUrl?: string | null;
   bannerItem?: PhotoItemDto | null;
   category?: CategoryResponse | null;
   tags?: TagResponse[];
@@ -208,8 +206,9 @@ export interface ArticleSummaryDto {
  */
 export interface PageModuleContent {
   articleIds?: string[];
-  imageUrls?: string[];
   articles?: ArticleSummaryDto[];
+  photoIds?: string[];
+  photoItems?: PhotoItemDto[];
 }
 
 /**
@@ -239,7 +238,7 @@ export interface CreatePageModuleParams {
   sortOrder: number;
   content: {
     articleIds?: string[];
-    imageUrls?: string[];
+    photoIds?: string[];
   };
   isActive: boolean;
 }

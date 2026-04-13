@@ -42,3 +42,13 @@ export function deletePageModule(id: string) {
     method: "delete",
   });
 }
+
+/**
+ * 获取首页模块详情
+ */
+export function getPageModuleDetail(id: string) {
+  return request<PageModuleResponseDto>({
+    url: `/api/pageModule/${id}`,
+    method: "get",
+  });
+}

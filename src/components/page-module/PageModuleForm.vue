@@ -1,180 +1,198 @@
 <template>
   <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" class="page-module-form">
-    <div class="form-body">
-      <div class="section-title">基本配置</div>
-      <el-row :gutter="40">
-        <el-col :span="16">
-          <el-form-item label="模块标题" prop="title">
-            <el-input
-              v-model="form.title"
-              placeholder="主要显示的标题名称"
-              maxlength="50"
-              show-word-limit
-            />
-          </el-form-item>
-          <el-form-item label="模块简介" prop="intro">
-            <el-input
-              v-model="form.intro"
-              type="textarea"
-              :rows="3"
-              placeholder="模块的描述信息（可选）"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="类型" prop="type">
-            <el-select
-              v-model="form.type"
-              :disabled="isEdit"
-              placeholder="内容载体类型"
-              style="width: 100%"
-              @change="handleTypeChange"
+    <div v-if="loading" class="form-loading" v-loading="true">
+      <div class="loading-text">正在加载模块详情...</div>
+    </div>
+    <div v-else-if="fetchError" class="form-error">
+      <el-result icon="error" title="加载失败" sub-title="无法获取模块详情，请检查网络或重试">
+        <template #extra>
+          <el-button type="primary" @click="props.moduleId && fetchDetail(props.moduleId)">
+            重试
+          </el-button>
+        </template>
+      </el-result>
+    </div>
+    <template v-else>
+      <div class="form-body">
+        <div class="section-title">基本配置</div>
+        <el-row :gutter="40">
+          <el-col :span="16">
+            <el-form-item label="模块标题" prop="title">
+              <el-input
+                v-model="form.title"
+                placeholder="主要显示的标题名称"
+                maxlength="50"
+                show-word-limit
+              />
+            </el-form-item>
+            <el-form-item label="模块简介" prop="intro">
+              <el-input
+                v-model="form.intro"
+                type="textarea"
+                :rows="3"
+                placeholder="模块的描述信息（可选）"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="类型" prop="type">
+              <el-select
+                v-model="form.type"
+                :disabled="isEdit"
+                placeholder="内容载体类型"
+                style="width: 100%"
+                @change="handleTypeChange"
+              >
+                <el-option
+                  v-for="item in PAGE_MODULE_TYPES"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="样式" prop="styleType">
+              <el-select v-model="form.styleType" placeholder="渲染样式" style="width: 100%">
+                <el-option
+                  v-for="item in PAGE_MODULE_STYLE_TYPES"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="排序权重" prop="sortOrder">
+              <el-input-number v-model="form.sortOrder" :min="0" style="width: 100%" />
+            </el-form-item>
+            <el-form-item label="激活状态" prop="isActive">
+              <el-switch v-model="form.isActive" active-text="启用" inactive-text="禁用" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-divider />
+        <div class="section-title">内容编排</div>
+
+        <!-- 文章列表模式 -->
+        <div v-if="form.type === 'POST_LIST'" class="content-config-card">
+          <div class="content-header">
+            <div class="tip">已选择的文章将按顺序在此模块中展示（可调整顺序）</div>
+            <el-button type="primary" :icon="Plus" @click="showArticleSelect = true"
+              >选取文章</el-button
             >
-              <el-option
-                v-for="item in PAGE_MODULE_TYPES"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="样式" prop="styleType">
-            <el-select v-model="form.styleType" placeholder="渲染样式" style="width: 100%">
-              <el-option
-                v-for="item in PAGE_MODULE_STYLE_TYPES"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="排序权重" prop="sortOrder">
-            <el-input-number v-model="form.sortOrder" :min="0" style="width: 100%" />
-          </el-form-item>
-          <el-form-item label="激活状态" prop="isActive">
-            <el-switch v-model="form.isActive" active-text="启用" inactive-text="禁用" />
-          </el-form-item>
-        </el-col>
-      </el-row>
+          </div>
 
-      <el-divider />
-      <div class="section-title">内容编排</div>
+          <div class="article-grid-container">
+            <draggable
+              v-model="selectedArticles"
+              item-key="id"
+              class="article-grid"
+              animation="300"
+              ghost-class="ghost-card"
+            >
+              <template #item="{ element, index }">
+                <div class="article-card-wrapper">
+                  <div class="article-card" :style="getCardStyle(element)">
+                    <!-- 蒙版 -->
+                    <div class="card-mask"></div>
 
-      <!-- 文章列表模式 -->
-      <div v-if="form.type === 'POST_LIST'" class="content-config-card">
-        <div class="content-header">
-          <div class="tip">已选择的文章将按顺序在此模块中展示（可调整顺序）</div>
-          <el-button type="primary" :icon="Plus" @click="showArticleSelect = true"
-            >选取文章</el-button
-          >
-        </div>
+                    <!-- 操作按钮 (右上角) -->
+                    <div class="card-actions">
+                      <el-icon class="action-btn del" @click.stop="removeArticle(index)"
+                        ><Delete
+                      /></el-icon>
+                    </div>
 
-        <div class="article-grid-container">
-          <draggable
-            v-model="selectedArticles"
-            item-key="id"
-            class="article-grid"
-            animation="300"
-            ghost-class="ghost-card"
-          >
-            <template #item="{ element, index }">
-              <div class="article-card-wrapper">
-                <div class="article-card" :style="getCardStyle(element)">
-                  <!-- 蒙版 -->
-                  <div class="card-mask"></div>
+                    <!-- 分类标签 (左上角) -->
+                    <div v-if="element.category" class="card-category">
+                      {{ element.category.name }}
+                    </div>
 
-                  <!-- 操作按钮 (右上角) -->
-                  <div class="card-actions">
-                    <el-icon class="action-btn del" @click.stop="removeArticle(index)"
-                      ><Delete
-                    /></el-icon>
-                  </div>
+                    <!-- 内容 -->
+                    <div class="card-content">
+                      <h4 class="card-title">{{ element.title }}</h4>
+                      <p class="card-intro">{{ element.summary || "暂无简介" }}</p>
+                      <div class="card-tags">
+                        <span v-for="tag in element.tags?.slice(0, 2)" :key="tag.id" class="mini-tag">
+                          #{{ tag.name }}
+                        </span>
+                      </div>
+                    </div>
 
-                  <!-- 分类标签 (左上角) -->
-                  <div v-if="element.category" class="card-category">
-                    {{ element.category.name }}
-                  </div>
-
-                  <!-- 内容 -->
-                  <div class="card-content">
-                    <h4 class="card-title">{{ element.title }}</h4>
-                    <p class="card-intro">{{ element.summary || "暂无简介" }}</p>
-                    <div class="card-tags">
-                      <span v-for="tag in element.tags?.slice(0, 2)" :key="tag.id" class="mini-tag">
-                        #{{ tag.name }}
-                      </span>
+                    <!-- 拖拽手柄 -->
+                    <div class="drag-handle">
+                      <el-icon><Rank /></el-icon>
                     </div>
                   </div>
+                </div>
+              </template>
+            </draggable>
+            <div v-if="!selectedArticles.length" class="empty-placeholder">
+              <el-empty :image-size="60" description="点击右上角按钮添加文章" />
+            </div>
+          </div>
+        </div>
 
-                  <!-- 拖拽手柄 -->
-                  <div class="drag-handle">
-                    <el-icon><Rank /></el-icon>
+        <!-- 照片集模式 -->
+        <div v-else-if="form.type === 'PHOTO_GALLERY'" class="content-config-card">
+          <div class="content-header">
+            <div class="tip">支持上传多张照片，支持拖拽排序</div>
+            <div class="button-items">
+              <el-upload
+                :action="`${IMAGE_BASE_URL}/api/upload/image`"
+                :headers="{ dogtoken: getToken() ?? '' }"
+                :show-file-list="false"
+                name="file"
+                multiple
+                :on-success="handleUploadSuccess"
+                :before-upload="beforeUpload"
+              >
+                <el-button type="primary" :icon="Upload">上传照片</el-button>
+              </el-upload>
+              <el-button
+                type="primary"
+                plain
+                :icon="Plus"
+                @click="mediaDialogVisible = true"
+                style="margin-left: 12px"
+              >
+                媒体库选取
+              </el-button>
+            </div>
+          </div>
+
+          <div class="photo-gallery-container">
+            <draggable v-model="photoItems" item-key="index" class="photo-grid" animation="300">
+              <template #item="{ element, index }">
+                <div class="photo-card">
+                  <el-image
+                    :src="getFullImageUrl(element.metadata?.thumbnailUrl)"
+                    fit="cover"
+                    class="photo-img"
+                  />
+                  <div class="photo-mask">
+                    <el-icon class="del-icon" @click="removePhoto(index)"><Delete /></el-icon>
                   </div>
                 </div>
-              </div>
-            </template>
-          </draggable>
-          <div v-if="!selectedArticles.length" class="empty-placeholder">
-            <el-empty :image-size="60" description="点击右上角按钮添加文章" />
+              </template>
+            </draggable>
+            <div v-if="!photoItems.length" class="empty-placeholder">
+              <el-empty :image-size="60" description="点击右上角按钮上传照片" />
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 照片集模式 -->
-      <div v-else-if="form.type === 'PHOTO_GALLERY'" class="content-config-card">
-        <div class="content-header">
-          <div class="tip">支持上传多张照片，支持拖拽排序</div>
-          <div class="button-items">
-            <el-upload
-              :action="`${IMAGE_BASE_URL}/api/upload/image`"
-              :headers="{ dogtoken: getToken() ?? '' }"
-              :show-file-list="false"
-              name="file"
-              multiple
-              :on-success="handleUploadSuccess"
-              :before-upload="beforeUpload"
-            >
-              <el-button type="primary" :icon="Upload">上传照片</el-button>
-            </el-upload>
-            <el-button
-              type="primary"
-              plain
-              :icon="Plus"
-              @click="mediaDialogVisible = true"
-              style="margin-left: 12px"
-            >
-              媒体库选取
-            </el-button>
-          </div>
-        </div>
-
-        <div class="photo-gallery-container">
-          <draggable v-model="imageUrls" item-key="index" class="photo-grid" animation="300">
-            <template #item="{ element, index }">
-              <div class="photo-card">
-                <el-image :src="getFullImageUrl(element)" fit="cover" class="photo-img" />
-                <div class="photo-mask">
-                  <el-icon class="del-icon" @click="removePhoto(index)"><Delete /></el-icon>
-                </div>
-              </div>
-            </template>
-          </draggable>
-          <div v-if="!imageUrls.length" class="empty-placeholder">
-            <el-empty :image-size="60" description="点击右上角按钮上传照片" />
-          </div>
-        </div>
+      <div class="footer-actions">
+        <el-button size="large" @click="$emit('cancel')">取消</el-button>
+        <el-button size="large" type="primary" :loading="submitting" @click="submitForm">
+          提交保存
+        </el-button>
       </div>
-    </div>
 
-    <div class="footer-actions">
-      <el-button size="large" @click="$emit('cancel')">取消</el-button>
-      <el-button size="large" type="primary" :loading="submitting" @click="submitForm">
-        提交保存
-      </el-button>
-    </div>
-
-    <ArticleSelectDialog v-model="showArticleSelect" @select="handleArticlesSelect" />
-    <MediaSelectDialog v-model="mediaDialogVisible" multiple @select="handleMediaSelect" />
+      <ArticleSelectDialog v-model="showArticleSelect" @select="handleArticlesSelect" />
+      <MediaSelectDialog v-model="mediaDialogVisible" multiple @select="handleMediaSelect" />
+    </template>
   </el-form>
 </template>
 
@@ -186,17 +204,18 @@ import ArticleSelectDialog from "./ArticleSelectDialog.vue";
 import { getToken } from "@/utils/auth";
 import { IMAGE_BASE_URL, getFullImageUrl } from "@/utils/url";
 import { PAGE_MODULE_TYPES, PAGE_MODULE_STYLE_TYPES } from "@/config/pageModule";
+import { getPageModuleDetail } from "@/api/page-module";
 import type {
-  PageModuleResponseDto,
   CreatePageModuleParams,
   ArticleSummaryDto,
   ArticleListItem,
+  PhotoItemDto,
 } from "@/api/types";
 import draggable from "vuedraggable";
 import { processImageBeforeUpload } from "@/utils/image";
 
 const props = defineProps<{
-  initialData?: PageModuleResponseDto | null;
+  moduleId?: string | null;
   submitting?: boolean;
 }>();
 
@@ -205,7 +224,9 @@ const emit = defineEmits(["save", "cancel"]);
 const formRef = ref<FormInstance>();
 const showArticleSelect = ref(false);
 const mediaDialogVisible = ref(false);
-const isEdit = computed(() => !!props.initialData);
+const isEdit = computed(() => !!props.moduleId);
+const loading = ref(false);
+const fetchError = ref(false);
 
 const form = reactive<CreatePageModuleParams>({
   title: "",
@@ -216,12 +237,12 @@ const form = reactive<CreatePageModuleParams>({
   isActive: true,
   content: {
     articleIds: [],
-    imageUrls: [],
+    photoIds: [],
   },
 });
 
 const selectedArticles = ref<ArticleSummaryDto[]>([]);
-const imageUrls = ref<string[]>([]);
+const photoItems = ref<PhotoItemDto[]>([]);
 
 const rules = {
   title: [{ required: true, message: "请输入模块标题", trigger: "blur" }],
@@ -229,24 +250,57 @@ const rules = {
   styleType: [{ required: true, message: "请选择样式类型", trigger: "change" }],
 };
 
-watch(
-  () => props.initialData,
-  (val) => {
-    if (val) {
+// 获取详情数据
+const fetchDetail = async (id: string) => {
+  loading.value = true;
+  fetchError.value = false;
+  try {
+    const data = await getPageModuleDetail(id);
+    if (data) {
       Object.assign(form, {
-        title: val.title,
-        type: val.type,
-        intro: val.intro || "",
-        styleType: val.styleType,
-        sortOrder: val.sortOrder,
-        isActive: val.isActive,
+        title: data.title,
+        type: data.type,
+        intro: data.intro || "",
+        styleType: data.styleType,
+        sortOrder: data.sortOrder,
+        isActive: data.isActive,
         content: {
-          articleIds: val.content.articleIds || [],
-          imageUrls: val.content.imageUrls || [],
+          articleIds: data.content.articleIds || [],
+          photoIds: data.content.photoIds || [],
         },
       });
-      selectedArticles.value = val.content.articles || [];
-      imageUrls.value = val.content.imageUrls || [];
+      selectedArticles.value = data.content.articles || [];
+      photoItems.value = data.content.photoItems || [];
+    }
+  } catch (error) {
+    console.error("Fetch page module detail error:", error);
+    fetchError.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+watch(
+  () => props.moduleId,
+  (val) => {
+    if (val) {
+      fetchDetail(val);
+    } else {
+      // 重置表单（如果是从编辑切换回新增，理论上由父组件控制销毁，但这里做个保险）
+      Object.assign(form, {
+        title: "",
+        type: "POST_LIST",
+        intro: "",
+        styleType: "default",
+        sortOrder: 0,
+        isActive: true,
+        content: {
+          articleIds: [],
+          photoIds: [],
+        },
+      });
+      selectedArticles.value = [];
+      photoItems.value = [];
     }
   },
   { immediate: true },
@@ -264,7 +318,7 @@ const handleArticlesSelect = (articles: ArticleListItem[]) => {
       id: a.id,
       title: a.title,
       summary: a.summary,
-      bannerUrl: a.bannerUrl,
+      bannerItem: a.bannerItem,
       category: a.category,
       tags: a.tags,
     }));
@@ -276,9 +330,9 @@ const removeArticle = (index: number) => {
 };
 
 const getCardStyle = (item: ArticleSummaryDto) => {
-  if (item.bannerUrl) {
+  if (item.bannerItem) {
     return {
-      backgroundImage: `url(${getFullImageUrl(item.bannerUrl)})`,
+      backgroundImage: `url(${getFullImageUrl(item.bannerItem.metadata?.thumbnailUrl)})`,
       backgroundSize: "cover",
       backgroundPosition: "center",
     };
@@ -296,16 +350,17 @@ const beforeUpload: UploadProps["beforeUpload"] = async (file) => {
   }
 };
 
-const handleMediaSelect = (urls: string[]) => {
-  if (urls.length > 0) {
-    imageUrls.value.push(...urls);
-    ElMessage.success(`成功从媒体库导入 ${urls.length} 张图片`);
+const handleMediaSelect = (items: PhotoItemDto[]) => {
+  if (items.length > 0) {
+    photoItems.value.push(...items);
+    ElMessage.success(`成功从媒体库导入 ${items.length} 张图片`);
   }
 };
 
 const handleUploadSuccess: UploadProps["onSuccess"] = (res) => {
-  if (res.code === 1 && res.data?.url) {
-    imageUrls.value.push(res.data.url);
+  const data = res.data as PhotoItemDto;
+  if (res.code === 1 && data) {
+    photoItems.value.push(data);
     ElMessage.success("上传成功");
   } else {
     ElMessage.error(res.message || "上传失败");
@@ -313,21 +368,29 @@ const handleUploadSuccess: UploadProps["onSuccess"] = (res) => {
 };
 
 const removePhoto = (index: number) => {
-  imageUrls.value.splice(index, 1);
+  photoItems.value.splice(index, 1);
 };
 
 const submitForm = async () => {
   if (!formRef.value) return;
   await formRef.value.validate((valid) => {
     if (valid) {
-      const payload = { ...form };
+      // 深度拷贝以防直接修改响应式数据
+      const payload = JSON.parse(JSON.stringify(form));
+
       if (form.type === "POST_LIST") {
         payload.content.articleIds = selectedArticles.value.map((a) => a.id);
-        payload.content.imageUrls = [];
+        payload.content.photoIds = [];
       } else {
-        payload.content.imageUrls = [...imageUrls.value];
+        payload.content.photoIds = photoItems.value.map((a) => a.id);
         payload.content.articleIds = [];
       }
+
+      // 显式删除废弃字段 imageUrls (如果存在的话)
+      if (payload.content.imageUrls) {
+        delete payload.content.imageUrls;
+      }
+
       emit("save", payload);
     }
   });
@@ -336,6 +399,23 @@ const submitForm = async () => {
 
 <style lang="less" scoped>
 .page-module-form {
+  .form-loading,
+  .form-error {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+
+    .loading-text {
+      margin-top: 16px;
+      color: #909399;
+      font-size: 14px;
+    }
+  }
+
   .section-title {
     font-size: 16px;
     font-weight: 600;

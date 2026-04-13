@@ -11,10 +11,10 @@
     <div class="article-select-container">
       <el-form :inline="true" :model="query" class="search-bar" size="default">
         <el-form-item label="分类">
-          <el-select 
-            v-model="query.categoryId" 
-            placeholder="全部分类" 
-            clearable 
+          <el-select
+            v-model="query.categoryId"
+            placeholder="全部分类"
+            clearable
             style="width: 150px"
             @change="handleCategoryChange"
           >
@@ -28,10 +28,10 @@
         </el-form-item>
 
         <el-form-item label="标签">
-          <el-select 
-            v-model="query.tagId" 
-            placeholder="全部标签" 
-            clearable 
+          <el-select
+            v-model="query.tagId"
+            placeholder="全部标签"
+            clearable
             :disabled="!query.categoryId"
             style="width: 150px"
             @change="handleSearch"
@@ -52,19 +52,16 @@
 
       <div v-loading="loading" class="grid-wrapper">
         <div v-if="articleList.length > 0" class="article-grid">
-          <div 
-            v-for="item in articleList" 
+          <div
+            v-for="item in articleList"
             :key="item.id"
             class="article-card"
             :class="{ active: isSelected(item) }"
             @click="toggleSelection(item)"
           >
             <!-- 背景图/渐变 -->
-            <div 
-              class="card-bg"
-              :style="getCardStyle(item)"
-            ></div>
-            
+            <div class="card-bg" :style="getCardStyle(item)"></div>
+
             <!-- 蒙版 -->
             <div class="card-mask"></div>
 
@@ -76,8 +73,8 @@
             <!-- 内容区域 -->
             <div class="card-content">
               <h4 class="card-title">{{ item.title }}</h4>
-              <p class="card-intro">{{ item.summary || '暂无简介' }}</p>
-              
+              <p class="card-intro">{{ item.summary || "暂无简介" }}</p>
+
               <div class="card-footer">
                 <div class="card-tags">
                   <span v-for="tag in item.tags?.slice(0, 2)" :key="tag.id" class="mini-tag">
@@ -111,25 +108,27 @@
       <div class="dialog-footer">
         <span class="selected-count">已选择 {{ selectedArticles.length }} 篇文章</span>
         <el-button @click="visible = false">取 消</el-button>
-        <el-button type="primary" @click="handleConfirm" :disabled="selectedArticles.length === 0">确 定</el-button>
+        <el-button type="primary" @click="handleConfirm" :disabled="selectedArticles.length === 0"
+          >确 定</el-button
+        >
       </div>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue';
-import { Search, Check } from '@element-plus/icons-vue';
-import { getArticleList } from '@/api/article';
-import { getCategoryList } from '@/api/category';
-import { getFullImageUrl } from '@/utils/url';
-import type { ArticleListItem, CategoryResponse } from '@/api/types';
+import { ref, reactive, computed, watch, onMounted } from "vue";
+import { Search, Check } from "@element-plus/icons-vue";
+import { getArticleList } from "@/api/article";
+import { getCategoryList } from "@/api/category";
+import { getFullImageUrl } from "@/utils/url";
+import type { ArticleListItem, CategoryResponse } from "@/api/types";
 
 const props = defineProps<{
   modelValue: boolean;
 }>();
 
-const emit = defineEmits(['update:modelValue', 'select']);
+const emit = defineEmits(["update:modelValue", "select"]);
 
 const visible = ref(props.modelValue);
 const loading = ref(false);
@@ -143,32 +142,35 @@ const categories = ref<CategoryResponse[]>([]);
 const query = reactive({
   page: 1,
   limit: 12, // 网格展示建议增加每页数量
-  categoryId: '',
-  tagId: '',
+  categoryId: "",
+  tagId: "",
 });
 
 // 计算当前分类下的可用标签
 const availableTags = computed(() => {
   if (!query.categoryId) return [];
-  const category = categories.value.find(c => c.id === query.categoryId);
+  const category = categories.value.find((c) => c.id === query.categoryId);
   return category?.tags || [];
 });
 
 const handleCategoryChange = () => {
-  query.tagId = ''; // 切换分类时清空标签
+  query.tagId = ""; // 切换分类时清空标签
   handleSearch(); // 自动刷新列表
 };
 
-watch(() => props.modelValue, (val) => {
-  visible.value = val;
-  if (val) {
-    handleSearch();
-    selectedArticles.value = []; // 每次打开清空选择，或根据需求保留
-  }
-});
+watch(
+  () => props.modelValue,
+  (val) => {
+    visible.value = val;
+    if (val) {
+      handleSearch();
+      selectedArticles.value = []; // 每次打开清空选择，或根据需求保留
+    }
+  },
+);
 
 watch(visible, (val) => {
-  emit('update:modelValue', val);
+  emit("update:modelValue", val);
 });
 
 const loadMeta = async () => {
@@ -176,7 +178,7 @@ const loadMeta = async () => {
     const cData = await getCategoryList();
     categories.value = cData;
   } catch (error) {
-    console.error('Failed to load metadata', error);
+    console.error("Failed to load metadata", error);
   }
 };
 
@@ -202,11 +204,11 @@ const handlePageChange = (page: number) => {
 };
 
 const isSelected = (item: ArticleListItem) => {
-  return selectedArticles.value.some(a => a.id === item.id);
+  return selectedArticles.value.some((a) => a.id === item.id);
 };
 
 const toggleSelection = (item: ArticleListItem) => {
-  const index = selectedArticles.value.findIndex(a => a.id === item.id);
+  const index = selectedArticles.value.findIndex((a) => a.id === item.id);
   if (index > -1) {
     selectedArticles.value.splice(index, 1);
   } else {
@@ -215,26 +217,26 @@ const toggleSelection = (item: ArticleListItem) => {
 };
 
 const getCardStyle = (item: ArticleListItem) => {
-  if (item.bannerUrl) {
+  if (item.bannerItem) {
     return {
-      backgroundImage: `url(${getFullImageUrl(item.bannerUrl)})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
+      backgroundImage: `url(${getFullImageUrl(item.bannerItem.metadata?.thumbnailUrl)})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
     };
   }
   // 随机或固定渐变兜底
   return {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
   };
 };
 
 const handleConfirm = () => {
-  emit('select', selectedArticles.value);
+  emit("select", selectedArticles.value);
   visible.value = false;
 };
 
 onMounted(() => {
-    loadMeta();
+  loadMeta();
 });
 </script>
 
@@ -285,12 +287,12 @@ onMounted(() => {
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     }
 
     &.active {
       border-color: #409eff;
-      
+
       .select-indicator {
         opacity: 1;
         transform: scale(1);
@@ -307,7 +309,12 @@ onMounted(() => {
       position: absolute;
       inset: 0;
       z-index: 2;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 0%,
+        rgba(0, 0, 0, 0.3) 60%,
+        transparent 100%
+      );
     }
 
     .card-category {
@@ -383,7 +390,7 @@ onMounted(() => {
       opacity: 0;
       transform: scale(0.5);
       transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
   }
 

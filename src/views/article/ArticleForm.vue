@@ -443,7 +443,6 @@ const handleSubmit = async () => {
     const payload = {
       title: form.title.trim(),
       summary: form.summary.trim() || undefined,
-      bannerUrl: bannerPath.value?.originalUrl || undefined, // 半路径提交给服务器
       bannerId: bannerPath.value?.id || undefined,
       content,
       categoryId: form.categoryId || undefined,
