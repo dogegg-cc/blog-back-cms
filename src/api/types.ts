@@ -129,6 +129,7 @@ export interface ArticleListItem {
   title: string;
   summary?: string | null;
   bannerUrl?: string | null;
+  bannerItem?: PhotoItemDto | null;
   viewCount: number;
   createdAt: string;
   updatedAt: string;
@@ -161,6 +162,7 @@ export interface ArticleDetail {
   title: string;
   summary?: string | null;
   bannerUrl?: string | null;
+  bannerItem?: PhotoItemDto | null;
   content: string;
   category?: CategoryResponse | null;
   tags?: TagResponse[];
@@ -177,6 +179,7 @@ export interface CreateArticleParams {
   summary?: string;
   /** 提交给服务器的半路径 */
   bannerUrl?: string;
+  bannerId?: string;
   content: string;
   categoryId?: string;
   tagIds?: string[];
@@ -195,6 +198,7 @@ export interface ArticleSummaryDto {
   title: string;
   summary?: string | null;
   bannerUrl?: string | null;
+  bannerItem?: PhotoItemDto | null;
   category?: CategoryResponse | null;
   tags?: TagResponse[];
 }

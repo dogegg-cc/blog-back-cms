@@ -60,10 +60,10 @@
         <el-table-column label="封面" width="120">
           <template #default="{ row }">
             <el-image
-              v-if="row.bannerUrl"
+              v-if="row.bannerItem"
               style="width: 80px; height: 50px; border-radius: 4px"
-              :src="getFullImageUrl(row.bannerUrl)"
-              :preview-src-list="[getFullImageUrl(row.bannerUrl)]"
+              :src="getFullImageUrl(row.bannerItem?.metadata?.thumbnailUrl)"
+              :preview-src-list="[getFullImageUrl(row.bannerItem?.originalUrl)]"
               preview-teleported
               fit="cover"
             />

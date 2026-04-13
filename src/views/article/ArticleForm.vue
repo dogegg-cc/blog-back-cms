@@ -56,7 +56,7 @@
               <div class="upload-tip-sub">支持 JPG / PNG / WebP</div>
             </div>
           </el-upload>
-          <div style="margin-top: 10px; text-align: center;">
+          <div style="margin-top: 10px; text-align: center">
             <el-button link type="primary" :icon="Check" @click="openMediaSelect('banner')">
               从媒体库选择
             </el-button>
@@ -180,11 +180,7 @@
     </el-dialog>
 
     <!-- 媒体库选择弹窗 -->
-    <MediaSelectDialog
-      v-model="mediaDialogVisible"
-      :multiple="false"
-      @select="handleMediaSelect"
-    />
+    <MediaSelectDialog v-model="mediaDialogVisible" :multiple="false" @select="handleMediaSelect" />
   </div>
 </template>
 
@@ -199,7 +195,12 @@ import { getCategoryList, createCategory } from "@/api/category";
 import { createTag } from "@/api/tag";
 import { processImageBeforeUpload } from "@/utils/image";
 import MediaSelectDialog from "@/components/media/MediaSelectDialog.vue";
-import type { CategoryResponse, CreateCategoryParams, CreateTagParams } from "@/api/types";
+import type {
+  CategoryResponse,
+  CreateCategoryParams,
+  CreateTagParams,
+  PhotoItemDto,
+} from "@/api/types";
 import { getToken } from "@/utils/auth";
 import { IMAGE_BASE_URL, getFullImageUrl, contentToHalfPath, contentToFullPath } from "@/utils/url";
 import { ElMessage } from "element-plus";
@@ -218,15 +219,15 @@ const openMediaSelect = (target: "banner" | "editor") => {
 };
 
 // 处理媒体库选择结果
-const handleMediaSelect = (urls: string[]) => {
-  const url = urls[0];
-  if (!url) return;
+const handleMediaSelect = (items: PhotoItemDto[]) => {
+  const item = items[0];
+  if (!item) return;
 
   if (mediaSelectTarget.value === "banner") {
-    bannerPath.value = url;
+    bannerPath.value = item;
     ElMessage.success("设置封面成功");
   } else if (mediaSelectTarget.value === "editor") {
-    const fullUrl = getFullImageUrl(url);
+    const fullUrl = getFullImageUrl(item.metadata?.mediumUrl);
     vditorInstance?.insertValue(`![](${fullUrl})\n`);
   }
 };
@@ -288,11 +289,11 @@ const handleStripSummary = () => {
 };
 
 // Banner 相关（半路径存服务器，完整 URL 仅用于预览）
-const bannerPath = ref<string>(""); // 半路径，提交给服务器
-const bannerPreviewUrl = computed(() => getFullImageUrl(bannerPath.value));
+const bannerPath = ref<PhotoItemDto | null>(null); // 半路径，提交给服务器
+const bannerPreviewUrl = computed(() => getFullImageUrl(bannerPath.value?.metadata?.mediumUrl));
 
 const removeBanner = () => {
-  bannerPath.value = "";
+  bannerPath.value = null;
 };
 
 // ============================================================
@@ -364,10 +365,10 @@ const initEditor = (content = "") => {
           body: formData,
         })
           .then((res) => res.json())
-          .then((res: { code: number; data?: { url: string }; message?: string }) => {
-            if (res.code === 1 && res.data?.url) {
+          .then((res: { code: number; data?: PhotoItemDto; message?: string }) => {
+            if (res.code === 1 && res.data) {
               // 拼接完整预览 URL 插入编辑器，半路径已在 url.ts 中转换
-              const fullUrl = getFullImageUrl(res.data.url);
+              const fullUrl = getFullImageUrl(res.data.metadata?.mediumUrl);
               vditorInstance?.insertValue(`![](${fullUrl})\n`);
             } else {
               ElMessage.error(res.message ?? "图片上传失败");
@@ -405,12 +406,12 @@ const beforeBannerUpload = async (file: File) => {
 
 interface UploadResponse {
   code: number;
-  data: { url: string };
+  data: PhotoItemDto;
 }
 
 const handleBannerSuccess = (response: UploadResponse) => {
-  if (response.code === 1 && response.data?.url) {
-    bannerPath.value = response.data.url; // 存半路径
+  if (response.code === 1 && response.data) {
+    bannerPath.value = response.data; // 存半路径
     ElMessage.success("封面上传成功");
   } else {
     ElMessage.error("封面上传失败，请重试");
@@ -442,7 +443,8 @@ const handleSubmit = async () => {
     const payload = {
       title: form.title.trim(),
       summary: form.summary.trim() || undefined,
-      bannerUrl: bannerPath.value || undefined, // 半路径提交给服务器
+      bannerUrl: bannerPath.value?.originalUrl || undefined, // 半路径提交给服务器
+      bannerId: bannerPath.value?.id || undefined,
       content,
       categoryId: form.categoryId || undefined,
       tagIds: form.tagIds.length > 0 ? form.tagIds : undefined,
@@ -566,7 +568,7 @@ const loadArticleDetail = async (id: string) => {
   form.summary = detail.summary ?? "";
   form.categoryId = detail.category?.id ?? undefined;
   form.tagIds = detail.tags?.map((t) => t.id) ?? [];
-  bannerPath.value = detail.bannerUrl ?? "";
+  bannerPath.value = detail.bannerItem ?? null;
   // 回显时：将内容中的半路径扩展为完整 URL，保证编辑器内图片正常加载
   return contentToFullPath(detail.content ?? "");
 };
