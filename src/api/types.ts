@@ -255,4 +255,4 @@ export interface MediaItem {
 /**
  * 媒体库分页返回
  */
-export type PaginatedMediaResult = PaginatedResult<MediaItem>;
+export type PaginatedMediaResult = PaginatedResult<PhotoItemDto>;

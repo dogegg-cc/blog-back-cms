@@ -13,23 +13,22 @@
       <div v-if="mediaList.length > 0" class="image-grid">
         <div
           v-for="item in mediaList"
-          :key="item.url"
+          :key="item.id"
           class="image-item"
-          :class="{ active: isSelected(item.url) }"
-          @click="toggleSelect(item.url)"
+          :class="{ active: isSelected(item.id) }"
+          @click="toggleSelect(item)"
         >
           <div class="image-wrapper">
             <el-image
-              :src="getFullImageUrl(item.url)"
+              :src="getFullImageUrl(item.metadata?.mediumUrl)"
               fit="cover"
               class="img-thumb"
               lazy
             />
-            <div class="check-icon" v-if="isSelected(item.url)">
+            <div class="check-icon" v-if="isSelected(item.id)">
               <el-icon><Check /></el-icon>
             </div>
           </div>
-          <div class="image-name" :title="item.name">{{ item.name }}</div>
         </div>
       </div>
       <el-empty v-else description="暂无图片数据" />
@@ -52,15 +51,11 @@
     <template #footer>
       <div class="dialog-footer">
         <div class="selected-count">
-          已选择 <span>{{ selectedUrls.length }}</span> 张图片
+          已选择 <span>{{ selectedItems.length }}</span> 张图片
         </div>
         <div>
           <el-button @click="visible = false">取消</el-button>
-          <el-button
-            type="primary"
-            :disabled="selectedUrls.length === 0"
-            @click="handleSubmit"
-          >
+          <el-button type="primary" :disabled="selectedItems.length === 0" @click="handleSubmit">
             确认选择
           </el-button>
         </div>
@@ -73,7 +68,7 @@
 import { ref, reactive } from "vue";
 import { Check } from "@element-plus/icons-vue";
 import { getMediaList } from "@/api/media";
-import type { MediaItem } from "@/api/types";
+import type { PhotoItemDto } from "@/api/types";
 import { getFullImageUrl } from "@/utils/url";
 
 const props = defineProps<{
@@ -81,7 +76,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "select", urls: string[]): void;
+  (e: "select", items: PhotoItemDto[]): void;
 }>();
 
 // 是否显示 (通过 v-model 绑定外层)
@@ -89,9 +84,9 @@ const visible = defineModel<boolean>();
 
 // 数据状态
 const loading = ref(false);
-const mediaList = ref<MediaItem[]>([]);
+const mediaList = ref<PhotoItemDto[]>([]);
 const total = ref(0);
-const selectedUrls = ref<string[]>([]);
+const selectedItems = ref<PhotoItemDto[]>([]);
 
 // 查询参数
 const queryParams = reactive({
@@ -101,7 +96,7 @@ const queryParams = reactive({
 
 // 处理打开弹窗
 const handleOpen = () => {
-  selectedUrls.value = [];
+  selectedItems.value = [];
   fetchMedia();
 };
 
@@ -125,28 +120,28 @@ const handleSizeChange = () => {
 };
 
 // 判断是否选中
-const isSelected = (url: string) => {
-  return selectedUrls.value.includes(url);
+const isSelected = (id: string) => {
+  return selectedItems.value.some((item: PhotoItemDto) => item.id === id);
 };
 
 // 切换选中状态
-const toggleSelect = (url: string) => {
+const toggleSelect = (item: PhotoItemDto) => {
   if (props.multiple) {
-    const index = selectedUrls.value.indexOf(url);
+    const index = selectedItems.value.findIndex((i: PhotoItemDto) => i.id === item.id);
     if (index > -1) {
-      selectedUrls.value.splice(index, 1);
+      selectedItems.value.splice(index, 1);
     } else {
-      selectedUrls.value.push(url);
+      selectedItems.value.push(item);
     }
   } else {
     // 单选模式
-    selectedUrls.value = [url];
+    selectedItems.value = [item];
   }
 };
 
 // 确认提交
 const handleSubmit = () => {
-  emit("select", [...selectedUrls.value]);
+  emit("select", [...selectedItems.value]);
   visible.value = false;
 };
 </script>

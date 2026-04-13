@@ -157,10 +157,11 @@ const handleAvatarSuccess: UploadProps["onSuccess"] = (response) => {
 };
 
 // 从媒体库选择处理
-const handleMediaSelect = (urls: string[]) => {
-  const url = urls[0];
-  if (url) {
-    form.avatar = url;
+const handleMediaSelect = (items: PhotoItemDto[]) => {
+  const item = items[0];
+  if (item) {
+    form.avatarId = item.id;
+    form.avatar = item.metadata?.mediumUrl || item.originalUrl;
     ElMessage.success("已从媒体库选择头像");
   }
 };
