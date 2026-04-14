@@ -77,30 +77,31 @@ const handleLogin = async () => {
       try {
         const data = await logon({
           username: loginForm.username,
-          password: loginForm.password
+          password: loginForm.password,
         });
 
         ElMessage.success("登录成功");
-        
+
         // 存储 Token 和 改密状态
         setToken(data.token);
         setUpdatePasswordStatus(data.isUpdatePassword);
 
         // 存储用户信息
         userStore.setUserInfo({
-            name: data.name ?? null,
-            email: data.email ?? null,
-            github: data.github ?? null,
-            slogan: data.slogan ?? null,
-            avatar: data.avatar ?? null,
-            isUpdatePassword: data.isUpdatePassword
+          name: data.name ?? null,
+          email: data.email ?? null,
+          github: data.github ?? null,
+          slogan: data.slogan ?? null,
+          avatar: data.avatar ?? null,
+          isUpdatePassword: data.isUpdatePassword,
+          avatarItem: data.avatarItem ?? null,
         });
 
         // 如果需要修改密码，跳转到改密页
         if (!data.isUpdatePassword) {
-            router.push("/update-password");
+          router.push("/update-password");
         } else {
-            router.push("/");
+          router.push("/");
         }
       } catch {
         // 错误控制交由 request.ts 中的全局拦截处理
