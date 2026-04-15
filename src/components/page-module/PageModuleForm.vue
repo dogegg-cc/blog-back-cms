@@ -52,7 +52,12 @@
               </el-select>
             </el-form-item>
             <el-form-item label="样式" prop="styleType">
-              <el-select v-model="form.styleType" placeholder="渲染样式" style="width: 100%">
+              <el-select
+                v-model="form.styleType"
+                placeholder="渲染样式"
+                style="width: 100%"
+                :disabled="!isEditStyleType"
+              >
                 <el-option
                   v-for="item in PAGE_MODULE_STYLE_TYPES"
                   :key="item.value"
@@ -113,7 +118,11 @@
                       <h4 class="card-title">{{ element.title }}</h4>
                       <p class="card-intro">{{ element.summary || "暂无简介" }}</p>
                       <div class="card-tags">
-                        <span v-for="tag in element.tags?.slice(0, 2)" :key="tag.id" class="mini-tag">
+                        <span
+                          v-for="tag in element.tags?.slice(0, 2)"
+                          :key="tag.id"
+                          class="mini-tag"
+                        >
                           #{{ tag.name }}
                         </span>
                       </div>
@@ -227,12 +236,13 @@ const mediaDialogVisible = ref(false);
 const isEdit = computed(() => !!props.moduleId);
 const loading = ref(false);
 const fetchError = ref(false);
+const isEditStyleType = computed(() => form.type === "POST_LIST");
 
 const form = reactive<CreatePageModuleParams>({
   title: "",
   type: "POST_LIST",
   intro: "",
-  styleType: "default",
+  styleType: "list",
   sortOrder: 0,
   isActive: true,
   content: {
@@ -240,6 +250,16 @@ const form = reactive<CreatePageModuleParams>({
     photoIds: [],
   },
 });
+
+watch(
+  () => form.type,
+  (newValue) => {
+    if (isEdit.value) {
+      return;
+    }
+    form.styleType = newValue === "POST_LIST" ? "list" : "carousel";
+  },
+);
 
 const selectedArticles = ref<ArticleSummaryDto[]>([]);
 const photoItems = ref<PhotoItemDto[]>([]);
@@ -291,7 +311,7 @@ watch(
         title: "",
         type: "POST_LIST",
         intro: "",
-        styleType: "default",
+        styleType: "list",
         sortOrder: 0,
         isActive: true,
         content: {
@@ -384,6 +404,7 @@ const submitForm = async () => {
       } else {
         payload.content.photoIds = photoItems.value.map((a) => a.id);
         payload.content.articleIds = [];
+        payload.styleType = "carousel";
       }
 
       // 显式删除废弃字段 imageUrls (如果存在的话)
