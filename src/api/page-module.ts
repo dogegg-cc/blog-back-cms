@@ -52,3 +52,14 @@ export function getPageModuleDetail(id: string) {
     method: "get",
   });
 }
+
+/**
+ * 批量更新模块排序
+ */
+export function reorderPageModules(ids: string[]) {
+  return request({
+    url: "/api/pageModule/reorder",
+    method: "patch",
+    data: { ids },
+  });
+}
