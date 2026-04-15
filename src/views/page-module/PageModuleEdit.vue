@@ -3,7 +3,7 @@
     <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span class="title">{{ id ? '编辑信息流模块' : '添加信息流模块' }}</span>
+          <span class="title">{{ id ? "编辑信息流模块" : "添加信息流模块" }}</span>
           <el-button @click="handleBack">返回列表</el-button>
         </div>
       </template>
@@ -19,12 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
-import PageModuleForm from '@/components/page-module/PageModuleForm.vue';
-import { createPageModule, updatePageModule } from '@/api/page-module';
-import type { CreatePageModuleParams, UpdatePageModuleParams } from '@/api/types';
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import PageModuleForm from "@/components/page-module/PageModuleForm.vue";
+import { createPageModule, updatePageModule } from "@/api/page-module";
+import type { CreatePageModuleParams, UpdatePageModuleParams } from "@/api/types";
 
 const route = useRoute();
 const router = useRouter();
@@ -33,7 +33,7 @@ const id = ref(route.params.id as string);
 const submitting = ref(false);
 
 const handleBack = () => {
-  router.push('/page-module/list');
+  router.push("/page-module/list");
 };
 
 const handleSave = async (formData: CreatePageModuleParams | UpdatePageModuleParams) => {
@@ -41,10 +41,10 @@ const handleSave = async (formData: CreatePageModuleParams | UpdatePageModulePar
   try {
     if (id.value) {
       await updatePageModule(id.value, formData);
-      ElMessage.success('修改成功');
+      ElMessage.success("修改成功");
     } else {
       await createPageModule(formData as CreatePageModuleParams);
-      ElMessage.success('添加成功');
+      ElMessage.success("添加成功");
     }
     handleBack();
   } finally {

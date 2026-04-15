@@ -66,9 +66,6 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="排序权重" prop="sortOrder">
-              <el-input-number v-model="form.sortOrder" :min="0" style="width: 100%" />
-            </el-form-item>
             <el-form-item label="激活状态" prop="isActive">
               <el-switch v-model="form.isActive" active-text="启用" inactive-text="禁用" />
             </el-form-item>
