@@ -81,3 +81,12 @@ npm run format
 
 ---
 由 **Antigravity** 协助驱动。
+
+<img width="1024" height="638" alt="image" src="https://github.com/user-attachments/assets/38b95621-82d7-495f-b91f-b279816d8530" />
+<img width="1024" height="638" alt="image" src="https://github.com/user-attachments/assets/3236d0ec-784a-4fd2-84c1-6faac288a3d8" />
+<img width="1024" height="638" alt="image" src="https://github.com/user-attachments/assets/9c38c65b-7338-437e-8a3b-9e99ddff74a4" />
+<img width="1024" height="638" alt="image" src="https://github.com/user-attachments/assets/4c44e7b9-f1f1-4c7e-9766-90bdebb2e38c" />
+
+
+
+
